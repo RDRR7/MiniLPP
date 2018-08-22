@@ -20,9 +20,16 @@ int main(int argc, char *argv[])
 
 	Lexer lexer(in);
 
-	while (lexer.get_next_token() != 0)
+	int token = lexer.get_next_token();
+	while (token != 0)
 	{
-		std::cout << lexer.get_lexeme() << std::endl;
+		if (token == static_cast<int>(Token::TK_UNKNOWN))
+		{
+			std::cout << "Unkown token " << lexer.get_lexeme() << std::endl;
+			return 1;
+		}
+		std::cout << lexer.get_lexeme() << " " << token << std::endl;
+		token = lexer.get_next_token();
 	}
 
 	return 0;
