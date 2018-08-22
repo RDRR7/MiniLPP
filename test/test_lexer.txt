@@ -1,0 +1,66 @@
++ - ^
+<-
+<=
+>=
+[ ] ( ) ^ * / +
+- , > < : =
+Inicio
+Escriba
+Llamar
+Fin
+Entero
+Caracter
+Booleano
+mod
+div
+y
+o
+Lea
+Si
+Sino
+Entonces
+Mientras
+Para
+Hasta
+Haga
+Repita
+Procedimiento
+Var
+Funcion
+Arreglo
+De
+Retorne
+Tipo
+Es
+
+"Esto es una literal de cadena, osea una cadena literalmente"
+
+12345
+78
+69
+
+'D'
+'e'
+'r'
+'i'
+'c'
+'k'
+
+'i'
+'s'
+
+'n'
+'o'
+'t'
+
+'h'
+'o'
+'t'
+
+// Esto no debería salir
+
+/*
+*
+* Esto tampoco debería salir
+*
+*/
