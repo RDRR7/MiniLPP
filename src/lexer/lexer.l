@@ -49,6 +49,9 @@
 "retorne"						return static_cast<int>(yytokentype::KW_RETORNE);
 "tipo"							return static_cast<int>(yytokentype::KW_TIPO);
 "es"							return static_cast<int>(yytokentype::KW_ES);
+"verdadero"						return static_cast<int>(yytokentype::KW_VERDADERO);
+"falso"							return static_cast<int>(yytokentype::KW_FALSO);
+"no"							return static_cast<int>(yytokentype::KW_NO);
 
 \'.\' 							return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
 \".*\" 							return static_cast<int>(yytokentype::TK_STRING_LITERAL);
@@ -79,6 +82,7 @@
 "<-"							return static_cast<int>(yytokentype::TK_ASSIGN);
 ">="							return static_cast<int>(yytokentype::TK_GToE);
 "<="							return static_cast<int>(yytokentype::TK_LToE);
+"<>"							return static_cast<int>(yytokentype::TK_NEQU);
 
 [ \t] 							;
 \n								return static_cast<int>(Token::TK_EOL);
@@ -86,7 +90,7 @@
 .								return static_cast<int>(Token::TK_UNKNOWN);
 
 <LINE_COMMENT>.					;
-<LINE_COMMENT>\n 				BEGIN(INITIAL);
+<LINE_COMMENT>\n 				BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
 
 <BLOCK_COMMENT>(.|\n)			;
 <BLOCK_COMMENT><<EOF>>			YY_FATAL_ERROR("Unclosed block comment");
