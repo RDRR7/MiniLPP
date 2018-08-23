@@ -4,8 +4,8 @@ project (mini_lpp)
 set (CMAKE_CXX_STANDARD 11)
 
 add_custom_command (
-	OUTPUT parser.hpp parser.cpp
-	COMMAND bison -o parser.cpp ${PROJECT_SOURCE_DIR}/parser/parser.y
+	OUTPUT parser.hpp parser.cpp parser.output
+	COMMAND bison -v -o parser.cpp ${PROJECT_SOURCE_DIR}/parser/parser.y
 	MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/parser/parser.y
 )
 

@@ -1,0 +1,65 @@
+/*Programa Para implementar el juego del buscaminas*/
+
+Tipo TCampoMinas es arreglo[11, 11] de Entero
+
+Entero num, i, n, mx, my, aFin, j, m, c, l
+TCampoMinas minas
+arreglo[1,1] de Entero amigo
+Booleano bTerminar
+
+Procedimiento escribiir(Entero cox, Entero coy, caracter valor1, Entero valor2, Entero vtipo)
+Inicio
+	/* llamar Posicionar_Cursor(cox + 33, coy + 8)
+	Si vtipo = 0 Entonces
+		Escriba valor1
+	Sino
+		Escriba valor2
+	Fin Si */
+Fin
+
+Procedimiento Destapar_Minas
+Inicio
+	/* Para i <- 2 Hasta 10 Haga
+		Para n<-2 Hasta 10 Haga
+			Si minas[i, n] = -1 Entonces
+				llamar escribiir(i, n, '*', 0, 0)
+			Fin Si
+		Fin Para
+	Fin Para */
+Fin
+
+Funcion Destapar(Entero cx, Entero cy): Entero
+Entero i, n, tipoE
+Inicio /* Si minas[cx,cy] = -1 Entonces //Destapo una mina
+		llamar Destapar_Minas()
+		Retorne 1
+	Sino
+		Si minas[cx,cy] = -3 Entonces
+			 Retorne 2
+		Fin Si
+		Si minas[cx,cy] > 0 Entonces //Destapo un nï¿½mero
+			llamar escribiir(cx, cy, ' ', minas[cx, cy], 1)
+			minas[cx, cy] <- -3 //-3 Significa que es una coordenada destapada
+			Retorne 0
+		Sino
+			llamar escribiir(cx, cy, ' ', 0, 0)
+			minas[cx,cy] <- -3
+			tipoE <- 0
+			Para i <- cx-1 Hasta cx+1 Haga
+				Para n <- cy-1 Hasta cy+1 Haga
+					Si minas[i, n] = 0 Entonces
+						tipoE <- destapar(i, n)
+					Sino
+						Si minas[i,n] > 0 Entonces
+							llamar escribiir(i, n, ' ', minas[i,n], 1)
+							minas[i,n] <- -3
+							tipoE <- 0
+						Fin Si
+					Fin Si
+				Fin Para
+			Fin Para
+		Fin Si
+	Fin Si
+
+	Retorne tipoE */
+Fin

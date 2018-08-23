@@ -25,6 +25,7 @@ enum class Token
 	TK_EQUAL = '=',
 	TK_COMMA = ',',
 	TK_SEMICOLON = ';',
+	TK_EOL = '\n',
 	TK_UNKNOWN = 998,
 };
 

@@ -80,8 +80,8 @@
 ">="							return static_cast<int>(yytokentype::TK_GToE);
 "<="							return static_cast<int>(yytokentype::TK_LToE);
 
-[ ] 							;
-\n								return 1;
+[ \t] 							;
+\n								return static_cast<int>(Token::TK_EOL);
 <INITIAL,LINE_COMMENT><<EOF>>	yyterminate();
 .								return static_cast<int>(Token::TK_UNKNOWN);
 

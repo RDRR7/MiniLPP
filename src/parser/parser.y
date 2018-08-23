@@ -24,8 +24,6 @@ int yylex();
 %token TK_GToE
 %token TK_LToE
 
-%token EOL
-
 %token KW_INICIO "inicio"
 %token KW_ESCRIBA "escriba"
 %token KW_LLAMAR "llamar"
@@ -55,24 +53,66 @@ int yylex();
 
 %%
 
-statements				:	statements statement		{}
-						|	statement					{}
+program						:	eols.opt
+								type-definition-section.opt
+								variable-section.opt
+								subprogram-decl.opt
+																							{}
 ;
-statement				:	assignment_statement		{}
+eols.opt 					: 	%empty														{}
+							| 	eols
 ;
-assignment_statement	:	TK_ID '=' expression ';'	{}
+eols						:	eols '\n'													{}
+							|	'\n'														{}
 ;
-expression				:	expression '+' term			{}
-						|	expression '-' term			{}
-						| 	term						{}
+type-definition-section.opt	:	%empty														{}
+							|	type-definition-section eols								{}
 ;
-term 					: 	term '*' factor 			{}
-						| 	term '/' factor 			{}
-						|	factor 						{}
+type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type			{}
+							|	"tipo" TK_ID "es" type										{}
 ;
-factor					:	'(' expression ')'			{}
-						|	TK_NUMBER					{}
-						|	TK_ID						{}
+type						:	"entero"													{}
+							|	"booleano"													{}
+							|	"caracter"													{}
+							|	TK_ID														{}
+							|	array-type													{}
+;
+array-type					:	"arreglo" '[' TK_NUMBER ',' TK_NUMBER ']' "de" type			{}
+;
+variable-section.opt		:	%empty														{}
+							|	variable-section eols										{}
+;
+variable-section			:	variable-section eols type id-list							{}
+							|	type id-list												{}
+;
+id-list						:	id-list	',' TK_ID											{}
+							|	TK_ID														{}
+;
+subprogram-decl.opt			:	%empty														{}
+							|	subprogram-decl-list eols									{}
+;
+subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl					{}
+							|	subprogram-decl
+;
+subprogram-decl				:	subprogram-header
+								eols
+								variable-section.opt
+								"inicio"
+								eols.opt
+								"fin"														{ /* In progress */ }
+;
+subprogram-header			:	function-header												{}
+							|	procedure-header											{}
+;
+function-header				:	"funcion" TK_ID arguments.opt ':' type						{}
+;
+arguments.opt				:	%empty														{}
+							|	'(' argument-decl-list ')'									{}
+;
+argument-decl-list			:	argument-decl-list ',' type TK_ID							{}
+							|	type TK_ID
+;
+procedure-header			:	"procedimiento" TK_ID arguments.opt 						{}
 ;
 
 %%
