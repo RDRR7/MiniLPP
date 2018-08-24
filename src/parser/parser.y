@@ -119,7 +119,9 @@ arguments.opt				:	%empty														{}
 							|	'(' argument-decl-list ')'									{}
 ;
 argument-decl-list			:	argument-decl-list ',' type TK_ID							{}
+							|	argument-decl-list ',' "var" type TK_ID						{}
 							|	type TK_ID													{}
+							|	"var" type TK_ID											{}
 ;
 procedure-header			:	"procedimiento" TK_ID arguments.opt 						{}
 ;
@@ -172,7 +174,7 @@ lvalue						:	TK_ID														{}
 							|	TK_ID '[' expr ']'											{}
 ;
 expr						:	expr '=' term												{}
-expr						:	expr "<>" term												{}
+							|	expr "<>" term												{}
 							|	expr '<' term												{}
 							|	expr '>' term												{}
 							|	expr ">=" term												{}
@@ -184,16 +186,18 @@ term						:	term '+' factor												{}
 							|	term 'o' factor												{}
 							|	factor														{}
 ;
-factor						:	factor '*' rvalue											{}
-							|	factor "div" rvalue											{}
-							|	factor "mod" rvalue											{}
-							|	factor 'y' rvalue											{}
-							|	rvalue
+factor						:	factor '*' exponent											{}
+							|	factor "div" exponent										{}
+							|	factor "mod" exponent										{}
+							|	factor 'y' exponent											{}
+							|	exponent
+;
+exponent					:	exponent '^' rvalue											{}
+							|	rvalue														{}
 ;
 rvalue						:	'(' expr ')'												{}
 							|	constant													{}
 							|	'-' expr													{}
-							|	'^' expr
 							|	lvalue														{}
 							|	subprogram-call												{}
 ;
