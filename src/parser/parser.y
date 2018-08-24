@@ -14,6 +14,7 @@ int yylex();
 %defines
 %define parse.lac full
 %define parse.error verbose
+%expect 48
 
 %token TK_NUMBER			"numero"
 %token TK_ID				"id"
@@ -133,6 +134,7 @@ statement-list				:	statement-list eols statement								{}
 ;
 statement					:	assign														{}
 							|	"llamar" subprogram-call									{}
+							|	"llamar" TK_ID												{}
 							|	"si" expr "entonces"
 								eols.opt
 								statement-list.opt

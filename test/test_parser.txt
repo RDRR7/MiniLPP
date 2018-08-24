@@ -1,158 +1,107 @@
-/*Programa Para implementar el juego del buscaminas*/
+/*
+    Este programa fue traido a ustedes gracias al gentil patrocinnio de
+    * Derick
+    * Noel
+    * Arzu
+    * Morales
+*/
 
-Tipo TCampoMinas es arreglo[11] de Entero
+/*
+    *  Debe ingresar:
+    -> Dos direcciones IPv4 (la de origen con la mascara de subred)
+    *  Ejemplo:
+        Arreglo [5] de Entero origen
+        Arreglo [4] de Entero destino
+        Booleano _necesitaEntrutamiento
+        Inicio
+            origen[1] <- 192
+            origen[2] <- 168
+            origen[3] <- 4
+            origen[4] <- 45
+            origen[5] <- 24
+            destino[1] <- 192
+            destino[2] <- 168
+            destino[3] <- 7
+            destino[4] <- 21
+            _necesitaEntrutamiento <- necesitaEntrutamiento(origen, destino)
+        Fin
+*/
 
-Entero num, i, n, mx, my, aFin, j, m, c, l
-TCampoMinas minas
-arreglo[1] de Entero amigo
-Booleano bTerminar
+Arreglo [5] de Entero origen
+Arreglo [4] de Entero destino
+Booleano _necesitaEnrutamiento
+Entero i
 
-Procedimiento escribiir(Entero cox, Entero coy, caracter valor1, Entero valor2, Entero vtipo)
+Funcion necesitaEnrutamiento (Arreglo [5] de Entero origen, Arreglo [4] de Entero destino) : Booleano
+Arreglo[4] de Entero mascara
+Arreglo[5] de Entero idRed
+Arreglo[4] de Entero broadcast
+Booleano retorno
+Entero octetosCompletos, conteo, octetoRestante, indice, potencia
 Inicio
-	llamar Posicionar_Cursor(cox + 33, coy + 8)
-	Si vtipo = 0 Entonces
-		Escriba valor1
-	Sino
-		Escriba valor2
-	Fin Si
+    octetosCompletos <- origen[5] div 8
+    Para indice <- 1 Hasta octetosCompletos Haga
+        mascara[indice] <- 255
+    Fin Para
+    conteo <- valorAbsoluto(8*octetosCompletos - origen[5])
+    potencia <- 7
+    octetoRestante <- 0
+    Para indice <- 1 Hasta conteo Haga
+        octetoRestante <- octetoRestante + 2^potencia
+        potencia <- potencia - 1
+    Fin Para
+    Si octetosCompletos + 1 <= 4 Entonces
+    	mascara[octetosCompletos + 1] <- octetoRestante
+    Fin Si
+    Si octetosCompletos + 2 <= 4 Entonces
+    	Para indice <- octetosCompletos + 2 Hasta 4 Haga
+    		mascara[indice] <- 0
+    	Fin Para
+    Fin Si
+    Escriba "Mascara de subred origen: ", mascara[1], ".", mascara[2], ".", mascara[3], ".", mascara[4], " = ", origen[5]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	idRed[indice] <- mascara[indice] y origen[indice]
+    Fin Para
+    idRed[5] <- origen[5]
+    Escriba "ID de red: ", idRed[1], ".", idRed[2], ".", idRed[3], ".", idRed[4], " / ", idRed[5]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	broadcast[indice] <- idRed[indice] o (255 - mascara[indice])
+    Fin Para
+    Escriba "Broadast: ", broadcast[1], ".", broadcast[2], ".", broadcast[3], ".", broadcast[4]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	Si ((destino[indice] < idRed[indice]) o (destino[indice] > broadcast[indice])) Entonces
+    		Retorne Verdadero
+		Fin Si
+	Fin Para
+    Retorne Falso
 Fin
 
-Procedimiento Destapar_Minas
+Funcion valorAbsoluto(Entero n) : Entero
 Inicio
-	Para i <- 2 Hasta 10 Haga
-		Para n<-2 Hasta 10 Haga
-			Si minas[i] = -1 Entonces
-				llamar escribiir(i, n, '*', 0, 0)
-			Fin Si
-		Fin Para
-	Fin Para
+    Si n < 1 Entonces
+        Retorne n*-1
+    Fin Si
+    Retorne n
 Fin
 
-Funcion Destapar(Entero cx, Entero cy): Entero
-Entero i, n, tipoE
-Inicio	Si minas[cx] = -1 Entonces //Destapo una mina
-		llamar Destapar_Minas()
-		Retorne 1
-	Sino
-		Si minas[cx] = -3 Entonces
-			 Retorne 2
-		Fin Si
-		Si minas[cx] > 0 Entonces //Destapo un nï¿½mero
-			llamar escribiir(cx, cy, ' ', minas[cx], 1)
-			minas[cx] <- -3 //-3 Significa que es una coordenada destapada
-			Retorne 0
-		Sino
-			llamar escribiir(cx, cy, ' ', 0, 0)
-			minas[cx] <- -3
-			tipoE <- 0
-			Para i <- cx-1 Hasta cx+1 Haga
-				Para n <- cy-1 Hasta cy+1 Haga
-					Si minas[i] = 0 Entonces
-						tipoE <- destapar(i, n)
-					Sino
-						Si minas[i] > 0 Entonces
-							llamar escribiir(i, n, ' ', minas[i], 1)
-							minas[i] <- -3
-							tipoE <- 0
-						Fin Si
-					Fin Si
-				Fin Para
-			Fin Para
-		Fin Si
-	Fin Si
-
-	retorne tipoE
-Fin
-
-Funcion Termino : Booleano
-	Entero i, n, cont
 Inicio
-	cont <- 0
-	Para i <- 2 Hasta 10 haga
-		Para n <- 2 Hasta 10 haga
-			Si minas[i] <> -3 Entonces
-				cont <- cont + 1
-			Fin Si
-		Fin Para
-	Fin Para
-	Si cont = 10 Entonces
-		Retorne Verdadero
-	Sino
-		Retorne Falso
-	Fin Si
-Fin
-
-Inicio Para i <- 1 Hasta 11 haga
-		minas[1]  <- -2
-		minas[i]	<- -2
-		minas[11] <- -2
-    	minas[i]	<- -2
-	Fin Para
-
-	Para i<-2 Hasta 10 haga
-		Para n<-2 Hasta 10 haga
-			minas[i] <- 0
-		Fin Para
-	Fin Para
-	llamar Inicializar_Aleatorio()
-
-	i<-1
-	Mientras i<=10 haga
-		mx<-(aleatorio() * 8) + 2
-		my<-(aleatorio() * 8) + 2
-		Si minas[mx] <> -1 Entonces
-			minas[mx] <- -1
-			i<-i+1
-		Fin  Si
-	Fin Mientras
-
-
-	Para i <-2 Hasta 10 haga
-		Para n <-2 Hasta 10 haga
-			Si minas[i] <> -1 Entonces
-				Para j<-i-1 Hasta i+1 haga
-					Para m<-n-1 Hasta n+1 haga
-						Si minas[j] = -1 Entonces
-							minas[i] <- minas[i] + minas[j]*-1
-						Fin Si
-					Fin Para
-				Fin Para
-			Fin Si
-		Fin Para
-	Fin Para
-
-	Para i<-1 Hasta 9 haga
-		llamar Posicionar_Cursor(34+i,8)
-		Escriba i
-		llamar Posicionar_Cursor(33,9+i)
-		Escriba i
-	Fin Para
-
-	Para i<-2 Hasta 10 haga
-		Para n<-2 Hasta 10 haga
-			llamar escribiir(i, n, '#', 0, 0)
-		Fin Para
-	Fin Para
-
-	bTerminar <- Falso
-	Mientras No bTerminar haga
-		Repita llamar Posicionar_Cursor(30,22)
-			Escriba "Coordenada X (1/9): "
-			lea c
-			llamar Posicionar_Cursor(30,23)
-			Escriba "Coordenada Y (1/9): "
-			lea l
-			Si (c<1) o (c>9) o (l<1) o (l>9) Entonces
-				llamar Posicionar_Cursor(20,2)
-				Escriba "las coordenadas estan mal especificadas X(1..9) y (1..9)..."
-			Fin Si
-		Hasta ((c>=1) y (c<=9)) y ((l>=1) y (l<=9))
-		Si Destapar(c+1, l+1) = 1 Entonces
-			bTerminar <- Verdadero
-		Sino
-			Si Termino() Entonces
-				bTerminar <- Verdadero
-			Fin Si
-		Fin Si
-	Fin Mientras
+    origen[1] <- 192
+    origen[2] <- 168
+    origen[3] <- 4
+    origen[4] <- 45
+    origen[5] <- 15
+    destino[1] <- 192
+    destino[2] <- 170
+    destino[3] <- 255
+    destino[4] <- 255
+    _necesitaEnrutamiento <- necesitaEnrutamiento(origen, destino)
+    Escriba "Necesita enrutamiento? "
+    Si _necesitaEnrutamiento = Verdadero Entonces
+    	Escriba "Si"
+    Sino
+    	Escriba "No"
+    Fin Si
 Fin
