@@ -77,10 +77,12 @@ program						:	eols.opt
 								eols.opt
 								statement-list.opt
 								"fin"
-								eols.opt											{ $$ = new ProgramNode($2,
-																										   $3,
-																										   $4,
-																										   $7); }
+								eols.opt											{
+																						$$ = new ProgramNode($2,
+																											 $3,
+																											 $4,
+																											 $7);
+																					}
 ;
 eols.opt 					: 	%empty												{ $$ = NULL; }
 							| 	eols
@@ -91,15 +93,18 @@ eols						:	eols '\n'											{ $$ = NULL; }
 type-definition-section.opt	:	%empty												{ $$ = NULL; }
 							|	type-definition-section eols						{ $$ = $1; }
 ;
-type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	 { std::list<ASTNode *> type_definitions;
-																					   type_definitions.push_back($1);
-																					   type_definitions.push_back(new TypeDefinition($4, $6));
-																					   $$ = new TypeDefinitionSection(type_definitions); }
+type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	{
+																						std::list<ASTNode *> type_definitions;
+																						type_definitions.push_back($1);
+																						type_definitions.push_back(new TypeDefinition($4, $6));
+																						$$ = new TypeDefinitionSection(type_definitions);
+
+																					}
 							|	"tipo" TK_ID "es" type								{ $$ = new TypeDefinition($2, $4); }
 ;
 type						:	"entero"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
-							|	"booleano"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
-							|	"caracter"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
+							|	"booleano"											{ $$ = new Type(TypeEnum::Booleano, NULL, NULL, NULL); }
+							|	"caracter"											{ $$ = new Type(TypeEnum::Caracter, NULL, NULL, NULL); }
 							|	TK_ID												{ $$ = new Type(TypeEnum::Tipo, NULL, $1, NULL); }
 							|	array-type											{ $$ = $1; }
 ;

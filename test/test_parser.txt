@@ -28,6 +28,9 @@
 */
 
 Tipo TCampoMinas es arreglo[11] de Entero
+Tipo TCampoMinas es Entero
+Tipo TCampoMinas es arreglo[11] de Booleano
+Tipo TCampoMinas es caracter
 
 Arreglo [5] de Entero origen
 Arreglo [4] de Entero destino
