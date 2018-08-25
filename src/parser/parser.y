@@ -1,7 +1,16 @@
-%{
+%code requires {
 
 #include <iostream>
 #include "lexer.hpp"
+#include "nodes.hpp"
+
+#define YYSTYPE_IS_DECLARED 1
+using YYSTYPE = ASTNode *;
+
+}
+
+%{
+#include "parser.hpp"
 
 extern std::ifstream in;
 Lexer lexer(in);
@@ -58,6 +67,8 @@ int yylex();
 
 %%
 
+start						:	program												{ std::cout << $1->to_string() << std::endl; }
+;
 program						:	eols.opt
 								type-definition-section.opt
 								variable-section.opt
@@ -66,42 +77,48 @@ program						:	eols.opt
 								eols.opt
 								statement-list.opt
 								"fin"
-								eols.opt													{}
+								eols.opt											{ $$ = new ProgramNode($2,
+																										   $3,
+																										   $4,
+																										   $7); }
 ;
-eols.opt 					: 	%empty														{}
+eols.opt 					: 	%empty												{ $$ = NULL; }
 							| 	eols
 ;
-eols						:	eols '\n'													{}
-							|	'\n'														{}
+eols						:	eols '\n'											{ $$ = NULL; }
+							|	'\n'												{ $$ = NULL; }
 ;
-type-definition-section.opt	:	%empty														{}
-							|	type-definition-section eols								{}
+type-definition-section.opt	:	%empty												{ $$ = NULL; }
+							|	type-definition-section eols						{ $$ = $1; }
 ;
-type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type			{}
-							|	"tipo" TK_ID "es" type										{}
+type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	 { std::list<ASTNode *> type_definitions;
+																					   type_definitions.push_back($1);
+																					   type_definitions.push_back(new TypeDefinition($4, $6));
+																					   $$ = new TypeDefinitionSection(type_definitions); }
+							|	"tipo" TK_ID "es" type								{ $$ = new TypeDefinition($2, $4); }
 ;
-type						:	"entero"													{}
-							|	"booleano"													{}
-							|	"caracter"													{}
-							|	TK_ID														{}
-							|	array-type													{}
+type						:	"entero"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
+							|	"booleano"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
+							|	"caracter"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
+							|	TK_ID												{ $$ = new Type(TypeEnum::Tipo, NULL, $1, NULL); }
+							|	array-type											{ $$ = $1; }
 ;
-array-type					:	"arreglo" '[' TK_NUMBER ']' "de" type						{}
+array-type					:	"arreglo" '[' TK_NUMBER ']' "de" type				{ $$ = new Type(TypeEnum::Arreglo, $3, NULL, $6); }
 ;
-variable-section.opt		:	%empty														{}
-							|	variable-section eols										{}
+variable-section.opt		:	%empty												{ $$ = NULL; }
+							|	variable-section eols								{ $$ = NULL; }
 ;
-variable-section			:	variable-section eols type id-list							{}
-							|	type id-list												{}
+variable-section			:	variable-section eols type id-list					{ $$ = NULL; }
+							|	type id-list										{ $$ = NULL; }
 ;
-id-list						:	id-list	',' TK_ID											{}
-							|	TK_ID														{}
+id-list						:	id-list	',' TK_ID									{ $$ = NULL; }
+							|	TK_ID												{ $$ = NULL; }
 ;
-subprogram-decl.opt			:	%empty														{}
-							|	subprogram-decl-list eols									{}
+subprogram-decl.opt			:	%empty												{ $$ = NULL; }
+							|	subprogram-decl-list eols							{ $$ = NULL; }
 ;
-subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl					{}
-							|	subprogram-decl												{}
+subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl			{ $$ = NULL; }
+							|	subprogram-decl										{ $$ = NULL; }
 ;
 subprogram-decl				:	subprogram-header
 								eols
@@ -109,112 +126,112 @@ subprogram-decl				:	subprogram-header
 								"inicio"
 								eols.opt
 								statement-list.opt
-								"fin"														{}
+								"fin"												{ $$ = NULL; }
 ;
-subprogram-header			:	function-header												{}
-							|	procedure-header											{}
+subprogram-header			:	function-header										{ $$ = NULL; }
+							|	procedure-header									{ $$ = NULL; }
 ;
-function-header				:	"funcion" TK_ID arguments.opt ':' type						{}
+function-header				:	"funcion" TK_ID arguments.opt ':' type				{ $$ = NULL; }
 ;
-arguments.opt				:	%empty														{}
-							|	'(' argument-decl-list ')'									{}
+arguments.opt				:	%empty												{ $$ = NULL; }
+							|	'(' argument-decl-list ')'							{ $$ = NULL; }
 ;
-argument-decl-list			:	argument-decl-list ',' type TK_ID							{}
-							|	argument-decl-list ',' "var" type TK_ID						{}
-							|	type TK_ID													{}
-							|	"var" type TK_ID											{}
+argument-decl-list			:	argument-decl-list ',' type TK_ID					{ $$ = NULL; }
+							|	argument-decl-list ',' "var" type TK_ID				{ $$ = NULL; }
+							|	type TK_ID											{ $$ = NULL; }
+							|	"var" type TK_ID									{ $$ = NULL; }
 ;
-procedure-header			:	"procedimiento" TK_ID arguments.opt 						{}
+procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = NULL; }
 ;
-statement-list.opt			:	%empty														{}
-							|	statement-list eols 										{}
+statement-list.opt			:	%empty												{ $$ = NULL; }
+							|	statement-list eols 								{ $$ = NULL; }
 ;
-statement-list				:	statement-list eols statement								{}
-							|	statement													{}
+statement-list				:	statement-list eols statement						{ $$ = NULL; }
+							|	statement											{ $$ = NULL; }
 ;
-statement					:	assign														{}
-							|	"llamar" subprogram-call									{}
-							|	"llamar" TK_ID												{}
+statement					:	assign												{ $$ = NULL; }
+							|	"llamar" subprogram-call							{ $$ = NULL; }
+							|	"llamar" TK_ID										{ $$ = NULL; }
 							|	"si" expr "entonces"
 								eols.opt
 								statement-list.opt
 								else.opt
-								"fin" "si"													{}
+								"fin" "si"											{ $$ = NULL; }
 							|	"mientras" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"											{}
+								"fin" "mientras"									{ $$ = NULL; }
 							|	"mientras" "no" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"											{}
+								"fin" "mientras"									{ $$ = NULL; }
 							|	"para" assign "hasta" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "para"												{}
+								"fin" "para"										{ $$ = NULL; }
 							|	"repita"
 								eols.opt
 								statement-list.opt
-								"hasta" expr												{}
-							|	"retorne" expr												{}
-							|	"escriba" argument-list-with-string							{}
-							|	"lea" lvalue												{}
+								"hasta" expr										{ $$ = NULL; }
+							|	"retorne" expr										{ $$ = NULL; }
+							|	"escriba" argument-list-with-string					{ $$ = NULL; }
+							|	"lea" lvalue										{ $$ = NULL; }
 ;
-argument-list-with-string	:	argument-list-with-string ',' expr							{}
-							|	argument-list-with-string ',' TK_STRING_LITERAL				{}
-							|	expr														{}
-							|	TK_STRING_LITERAL											{}
+argument-list-with-string	:	argument-list-with-string ',' expr					{ $$ = NULL; }
+							|	argument-list-with-string ',' TK_STRING_LITERAL		{ $$ = NULL; }
+							|	expr												{ $$ = NULL; }
+							|	TK_STRING_LITERAL									{ $$ = NULL; }
 ;
-else.opt					:	%empty														{}
+else.opt					:	%empty												{ $$ = NULL; }
 							|	"sino"
 								eols.opt
-								statement-list.opt											{}
+								statement-list.opt									{ $$ = NULL; }
 ;
-assign						:	lvalue "<-" expr											{}
+assign						:	lvalue "<-" expr									{ $$ = NULL; }
 ;
-lvalue						:	TK_ID														{}
-							|	TK_ID '[' expr ']'											{}
+lvalue						:	TK_ID												{ $$ = NULL; }
+							|	TK_ID '[' expr ']'									{ $$ = NULL; }
 ;
-expr						:	expr '=' term												{}
-							|	expr "<>" term												{}
-							|	expr '<' term												{}
-							|	expr '>' term												{}
-							|	expr ">=" term												{}
-							|	expr "<=" term												{}
-							|	term														{}
+expr						:	expr '=' term										{ $$ = NULL; }
+							|	expr "<>" term										{ $$ = NULL; }
+							|	expr '<' term										{ $$ = NULL; }
+							|	expr '>' term										{ $$ = NULL; }
+							|	expr ">=" term										{ $$ = NULL; }
+							|	expr "<=" term										{ $$ = NULL; }
+							|	term												{ $$ = NULL; }
 ;
-term						:	term '+' factor												{}
-							|	term '-' factor												{}
-							|	term 'o' factor												{}
-							|	factor														{}
+term						:	term '+' factor										{ $$ = NULL; }
+							|	term '-' factor										{ $$ = NULL; }
+							|	term 'o' factor										{ $$ = NULL; }
+							|	factor												{ $$ = NULL; }
 ;
-factor						:	factor '*' exponent											{}
-							|	factor "div" exponent										{}
-							|	factor "mod" exponent										{}
-							|	factor 'y' exponent											{}
+factor						:	factor '*' exponent									{ $$ = NULL; }
+							|	factor "div" exponent								{ $$ = NULL; }
+							|	factor "mod" exponent								{ $$ = NULL; }
+							|	factor 'y' exponent									{ $$ = NULL; }
 							|	exponent
 ;
-exponent					:	exponent '^' rvalue											{}
-							|	rvalue														{}
+exponent					:	exponent '^' rvalue									{ $$ = NULL; }
+							|	rvalue												{ $$ = NULL; }
 ;
-rvalue						:	'(' expr ')'												{}
-							|	constant													{}
-							|	'-' expr													{}
-							|	lvalue														{}
-							|	subprogram-call												{}
+rvalue						:	'(' expr ')'										{ $$ = NULL; }
+							|	constant											{ $$ = NULL; }
+							|	'-' expr											{ $$ = NULL; }
+							|	lvalue												{ $$ = NULL; }
+							|	subprogram-call										{ $$ = NULL; }
 ;
-constant					:	TK_NUMBER													{}
-							|	TK_CHARACTER_LITERAL										{}
-							|	"verdadero"													{}
-							|	"falso"														{}
+constant					:	TK_NUMBER											{ $$ = NULL; }
+							|	TK_CHARACTER_LITERAL								{ $$ = NULL; }
+							|	"verdadero"											{ $$ = NULL; }
+							|	"falso"												{ $$ = NULL; }
 ;
-subprogram-call				:	TK_ID '(' argument-list.opt ')'								{}
+subprogram-call				:	TK_ID '(' argument-list.opt ')'						{ $$ = NULL; }
 ;
-argument-list.opt			:	%empty														{}
-							|	argument-list												{}
+argument-list.opt			:	%empty												{ $$ = NULL; }
+							|	argument-list										{ $$ = NULL; }
 ;
-argument-list				:	argument-list ',' expr										{}
-							|	expr														{}
+argument-list				:	argument-list ',' expr								{ $$ = NULL; }
+							|	expr												{ $$ = NULL; }
 ;
 
 %%

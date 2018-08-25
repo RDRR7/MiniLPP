@@ -27,6 +27,8 @@
         Fin
 */
 
+Tipo TCampoMinas es arreglo[11] de Entero
+
 Arreglo [5] de Entero origen
 Arreglo [4] de Entero destino
 Booleano _necesitaEnrutamiento

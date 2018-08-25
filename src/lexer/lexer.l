@@ -77,8 +77,8 @@
 "//" 							BEGIN(LINE_COMMENT);
 "/*" 							BEGIN(BLOCK_COMMENT);
 
-[0-9]+							return static_cast<int>(yytokentype::TK_NUMBER);
-[_a-z][_a-z0-9]*				return static_cast<int>(yytokentype::TK_ID);
+[0-9]+							yylval = new NumberNode(std::stoi(get_lexeme())); return static_cast<int>(yytokentype::TK_NUMBER);
+[_a-z][_a-z0-9]*				yylval = new StringNode(get_lexeme()); return static_cast<int>(yytokentype::TK_ID);
 "<-"							return static_cast<int>(yytokentype::TK_ASSIGN);
 ">="							return static_cast<int>(yytokentype::TK_GToE);
 "<="							return static_cast<int>(yytokentype::TK_LToE);
