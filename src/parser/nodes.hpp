@@ -83,7 +83,7 @@ class StringNode : public ASTNode
   public:
 	StringNode(std::string id)
 		: id(id) {}
-	std::string to_string() { return id; }
+	std::string to_string() override { return id; }
 
 	std::string id;
 };
@@ -93,9 +93,40 @@ class NumberNode : public ASTNode
   public:
 	NumberNode(int number)
 		: number(number) {}
-	std::string to_string() { return std::to_string(number); }
+	std::string to_string() override { return std::to_string(number); }
 
 	int number;
+};
+
+class VariableSectionList : public ASTNode
+{
+  public:
+	VariableSectionList(std::list<ASTNode *> variable_sections)
+		: variable_sections(variable_sections) {}
+	std::string to_string();
+
+	std::list<ASTNode *> variable_sections;
+};
+
+class VariableSection : public ASTNode
+{
+  public:
+	VariableSection(ASTNode *ids, ASTNode *type)
+		: ids(ids), type(type) {}
+	std::string to_string() override;
+
+	ASTNode *ids;
+	ASTNode *type;
+};
+
+class IdList : public ASTNode
+{
+  public:
+	IdList(std::list<ASTNode *> ids)
+		: ids(ids) {}
+	std::string to_string() override;
+
+	std::list<ASTNode *> ids;
 };
 
 #endif

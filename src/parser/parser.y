@@ -98,7 +98,6 @@ type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	{
 																						type_definitions.push_back($1);
 																						type_definitions.push_back(new TypeDefinition($4, $6));
 																						$$ = new TypeDefinitionSection(type_definitions);
-
 																					}
 							|	"tipo" TK_ID "es" type								{ $$ = new TypeDefinition($2, $4); }
 ;
@@ -111,13 +110,23 @@ type						:	"entero"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NUL
 array-type					:	"arreglo" '[' TK_NUMBER ']' "de" type				{ $$ = new Type(TypeEnum::Arreglo, $3, NULL, $6); }
 ;
 variable-section.opt		:	%empty												{ $$ = NULL; }
-							|	variable-section eols								{ $$ = NULL; }
+							|	variable-section eols								{ $$ = $1; }
 ;
-variable-section			:	variable-section eols type id-list					{ $$ = NULL; }
-							|	type id-list										{ $$ = NULL; }
+variable-section			:	variable-section eols type id-list					{
+																						std::list<ASTNode *> variable_sections;
+																						variable_sections.push_back($1);
+																						variable_sections.push_back(new VariableSection($4, $3));
+																						$$ = new VariableSectionList(variable_sections);
+																					}
+							|	type id-list										{ $$ = new VariableSection($2, $1); }
 ;
-id-list						:	id-list	',' TK_ID									{ $$ = NULL; }
-							|	TK_ID												{ $$ = NULL; }
+id-list						:	id-list	',' TK_ID									{
+																						std::list<ASTNode *> ids;
+																						ids.push_back($1);
+																						ids.push_back($3);
+																						$$ = new IdList(ids);
+																					}
+							|	TK_ID												{ $$ = $1; }
 ;
 subprogram-decl.opt			:	%empty												{ $$ = NULL; }
 							|	subprogram-decl-list eols							{ $$ = NULL; }
