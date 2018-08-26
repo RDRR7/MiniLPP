@@ -27,10 +27,11 @@ class ProgramNode : public ASTNode
 	ProgramNode(ASTNode *type_definition_section,
 				ASTNode *variable_section,
 				ASTNode *subprogram_decl,
-				ASTNode *statement_list) : type_definition_section(type_definition_section),
-										   variable_section(variable_section),
-										   subprogram_decl(subprogram_decl),
-										   statement_list(statement_list) {}
+				ASTNode *statement_list)
+		: type_definition_section(type_definition_section),
+		  variable_section(variable_section),
+		  subprogram_decl(subprogram_decl),
+		  statement_list(statement_list) {}
 	std::string to_string() override;
 
 	ASTNode *type_definition_section;
@@ -66,10 +67,11 @@ class Type : public ASTNode
 	Type(TypeEnum type,
 		 ASTNode *array_size,
 		 ASTNode *user_type,
-		 ASTNode *array_type) : type(type),
-								array_size(array_size),
-								user_type(user_type),
-								array_type(array_type) {}
+		 ASTNode *array_type)
+		: type(type),
+		  array_size(array_size),
+		  user_type(user_type),
+		  array_type(array_type) {}
 	std::string to_string() override;
 
 	TypeEnum type;
@@ -93,7 +95,10 @@ class NumberNode : public ASTNode
   public:
 	NumberNode(int number)
 		: number(number) {}
-	std::string to_string() override { return std::to_string(number); }
+	std::string to_string() override
+	{
+		return std::to_string(number);
+	}
 
 	int number;
 };
@@ -127,6 +132,74 @@ class IdList : public ASTNode
 	std::string to_string() override;
 
 	std::list<ASTNode *> ids;
+};
+
+class SubprogramDeclList : public ASTNode
+{
+  public:
+	SubprogramDeclList(std::list<ASTNode *> subprogram_decls)
+		: subprogram_decls(subprogram_decls) {}
+	std::string to_string() override;
+
+	std::list<ASTNode *> subprogram_decls;
+};
+
+class SubprogramDecl : public ASTNode
+{
+  public:
+	SubprogramDecl(ASTNode *header,
+				   ASTNode *variable_section,
+				   ASTNode *statements)
+		: header(header),
+		  variable_section(variable_section),
+		  statements(statements) {}
+	std::string to_string() override;
+
+	ASTNode *header;
+	ASTNode *variable_section;
+	ASTNode *statements;
+};
+
+class SubprogramDeclHeader : public ASTNode
+{
+  public:
+	SubprogramDeclHeader(ASTNode *id,
+						 ASTNode *arguments,
+						 ASTNode *type)
+		: id(id),
+		  arguments(arguments),
+		  type(type) {}
+	std::string to_string() override;
+
+	ASTNode *id;
+	ASTNode *arguments;
+	ASTNode *type;
+};
+
+class ArgumentDeclList : public ASTNode
+{
+  public:
+	ArgumentDeclList(std::list<ASTNode *> arguments_decls)
+		: arguments_decls(arguments_decls) {}
+	std::string to_string() override;
+
+	std::list<ASTNode *> arguments_decls;
+};
+
+class ArgumentDecl : public ASTNode
+{
+  public:
+	ArgumentDecl(ASTNode *type,
+				 ASTNode *id,
+				 bool var)
+		: type(type),
+		  id(id),
+		  var(var) {}
+	std::string to_string() override;
+
+	ASTNode *type;
+	ASTNode *id;
+	bool var;
 };
 
 #endif

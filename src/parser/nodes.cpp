@@ -100,17 +100,112 @@ std::string IdList::to_string()
 		{
 			if (id != ids.back())
 			{
-				id_list_str = id->to_string() + ",";
+				id_list_str += id->to_string() + ", ";
 			}
 			else
 			{
-				id_list_str = id->to_string();
+				id_list_str += id->to_string();
 			}
 		}
 	}
-	else
+	else if (!ids.empty())
 	{
 		id_list_str = ids.front()->to_string();
 	}
 	return id_list_str;
+}
+
+std::string SubprogramDeclList::to_string()
+{
+	std::string subprogram_decl_list_str = "";
+	for (auto subprogram_decl : subprogram_decls)
+	{
+		subprogram_decl_list_str += subprogram_decl->to_string();
+	}
+	return subprogram_decl_list_str;
+}
+
+std::string SubprogramDecl::to_string()
+{
+	std::string subprogram_decl_str = "";
+	subprogram_decl_str += header->to_string();
+	if (variable_section != NULL)
+	{
+		subprogram_decl_str += variable_section->to_string();
+	}
+	subprogram_decl_str += "inicio\n";
+	if (statements != NULL)
+	{
+		subprogram_decl_str += statements->to_string();
+	}
+	subprogram_decl_str += "fin\n";
+	return subprogram_decl_str;
+}
+
+std::string SubprogramDeclHeader::to_string()
+{
+	std::string subprogram_decl_header_str = "";
+	if (type != NULL)
+	{
+		subprogram_decl_header_str += "funcion ";
+	}
+	else
+	{
+		subprogram_decl_header_str += "procedimiento ";
+	}
+	subprogram_decl_header_str += id->to_string();
+	subprogram_decl_header_str += "(";
+	if (arguments != NULL)
+	{
+		subprogram_decl_header_str += arguments->to_string();
+	}
+	subprogram_decl_header_str += ")";
+	if (type != NULL)
+	{
+		subprogram_decl_header_str += " : ";
+		subprogram_decl_header_str += type->to_string();
+		subprogram_decl_header_str += "\n";
+	}
+	else
+	{
+		subprogram_decl_header_str += "\n";
+	}
+	return subprogram_decl_header_str;
+}
+
+std::string ArgumentDeclList::to_string()
+{
+	std::string argument_decl_list_str = "";
+	if (arguments_decls.size() > 1)
+	{
+		for (auto argument_decl : arguments_decls)
+		{
+			if (argument_decl != arguments_decls.back())
+			{
+				argument_decl_list_str += argument_decl->to_string() + ", ";
+			}
+			else
+			{
+				argument_decl_list_str += argument_decl->to_string();
+			}
+		}
+	}
+	else if (!arguments_decls.empty())
+	{
+		argument_decl_list_str = arguments_decls.front()->to_string();
+	}
+	return argument_decl_list_str;
+}
+
+std::string ArgumentDecl::to_string()
+{
+	std::string argument_decl_str = "";
+	if (var)
+	{
+		argument_decl_str += "var ";
+	}
+	argument_decl_str += type->to_string();
+	argument_decl_str += " ";
+	argument_decl_str += id->to_string();
+	return argument_decl_str;
 }

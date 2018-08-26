@@ -77,12 +77,7 @@ program						:	eols.opt
 								eols.opt
 								statement-list.opt
 								"fin"
-								eols.opt											{
-																						$$ = new ProgramNode($2,
-																											 $3,
-																											 $4,
-																											 $7);
-																					}
+								eols.opt											{ $$ = new ProgramNode($2, $3, $4, $7); }
 ;
 eols.opt 					: 	%empty												{ $$ = NULL; }
 							| 	eols
@@ -129,10 +124,15 @@ id-list						:	id-list	',' TK_ID									{
 							|	TK_ID												{ $$ = $1; }
 ;
 subprogram-decl.opt			:	%empty												{ $$ = NULL; }
-							|	subprogram-decl-list eols							{ $$ = NULL; }
+							|	subprogram-decl-list eols							{ $$ = $1; }
 ;
-subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl			{ $$ = NULL; }
-							|	subprogram-decl										{ $$ = NULL; }
+subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl			{
+																						std::list<ASTNode *> subprogram_decls;
+																						subprogram_decls.push_back($1);
+																						subprogram_decls.push_back($3);
+																						$$ = new SubprogramDeclList(subprogram_decls);
+																					}
+							|	subprogram-decl										{ $$ = $1; }
 ;
 subprogram-decl				:	subprogram-header
 								eols
@@ -140,22 +140,32 @@ subprogram-decl				:	subprogram-header
 								"inicio"
 								eols.opt
 								statement-list.opt
-								"fin"												{ $$ = NULL; }
+								"fin"												{ $$ = new SubprogramDecl($1, $3, $6); }
 ;
-subprogram-header			:	function-header										{ $$ = NULL; }
-							|	procedure-header									{ $$ = NULL; }
+subprogram-header			:	function-header										{ $$ = $1; }
+							|	procedure-header									{ $$ = $1; }
 ;
-function-header				:	"funcion" TK_ID arguments.opt ':' type				{ $$ = NULL; }
+function-header				:	"funcion" TK_ID arguments.opt ':' type				{ $$ = new SubprogramDeclHeader($2, $3, $5); }
 ;
 arguments.opt				:	%empty												{ $$ = NULL; }
-							|	'(' argument-decl-list ')'							{ $$ = NULL; }
+							|	'(' argument-decl-list ')'							{ $$ = $2; }
 ;
-argument-decl-list			:	argument-decl-list ',' type TK_ID					{ $$ = NULL; }
-							|	argument-decl-list ',' "var" type TK_ID				{ $$ = NULL; }
-							|	type TK_ID											{ $$ = NULL; }
-							|	"var" type TK_ID									{ $$ = NULL; }
+argument-decl-list			:	argument-decl-list ',' type TK_ID					{
+																						std::list<ASTNode *> arguments_decls;
+																						arguments_decls.push_back($1);
+																						arguments_decls.push_back(new ArgumentDecl($3, $4, false));
+																						$$ = new ArgumentDeclList(arguments_decls);
+																					}
+							|	argument-decl-list ',' "var" type TK_ID				{
+																						std::list<ASTNode *> arguments_decls;
+																						arguments_decls.push_back($1);
+																						arguments_decls.push_back(new ArgumentDecl($4, $4, true));
+																						$$ = new ArgumentDeclList(arguments_decls);
+							 														}
+							|	type TK_ID											{ $$ = new ArgumentDecl($1, $2, false); }
+							|	"var" type TK_ID									{ $$ = new ArgumentDecl($2, $3, true); }
 ;
-procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = NULL; }
+procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = new SubprogramDeclHeader($2, $3, NULL); }
 ;
 statement-list.opt			:	%empty												{ $$ = NULL; }
 							|	statement-list eols 								{ $$ = NULL; }
