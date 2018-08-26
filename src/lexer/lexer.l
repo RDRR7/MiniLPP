@@ -7,7 +7,8 @@
 %{
 
 #include <fstream>
-#include "./lexer/lexer.hpp"
+#include "lexer.hpp"
+#include "parser.hpp"
 
 #define YY_DECL int Lexer::_get_next_token(yyscan_t yyscanner)
 #define YY_INPUT(buf, result, max_size)          \
@@ -22,35 +23,38 @@
 
 %%
 
-"inicio"						return 1;
-"escriba"						return 1;
-"llamar"						return 1;
-"fin"							return 1;
-"entero"						return 1;
-"caracter"						return 1;
-"booleano"						return 1;
-"mod"							return 1;
-"div"							return 1;
-"lea"							return 1;
-"si"							return 1;
-"sino"							return 1;
-"entonces"						return 1;
-"mientras"						return 1;
-"para"							return 1;
-"hasta"							return 1;
-"haga"							return 1;
-"repita"						return 1;
-"procedimiento"					return 1;
-"var"							return 1;
-"funcion"						return 1;
-"arreglo"						return 1;
-"de"							return 1;
-"retorne"						return 1;
-"tipo"							return 1;
-"es"							return 1;
+"inicio"						return static_cast<int>(yytokentype::KW_INICIO);
+"escriba"						return static_cast<int>(yytokentype::KW_ESCRIBA);
+"llamar"						return static_cast<int>(yytokentype::KW_LLAMAR);
+"fin"							return static_cast<int>(yytokentype::KW_FIN);
+"entero"						return static_cast<int>(yytokentype::KW_ENTERO);
+"caracter"						return static_cast<int>(yytokentype::KW_CARACTER);
+"booleano"						return static_cast<int>(yytokentype::KW_BOOLEANO);
+"mod"							return static_cast<int>(yytokentype::KW_MOD);
+"div"							return static_cast<int>(yytokentype::KW_DIV);
+"lea"							return static_cast<int>(yytokentype::KW_LEA);
+"si"							return static_cast<int>(yytokentype::KW_SI);
+"sino"							return static_cast<int>(yytokentype::KW_SINO);
+"entonces"						return static_cast<int>(yytokentype::KW_ENTONCES);
+"mientras"						return static_cast<int>(yytokentype::KW_MIENTRAS);
+"para"							return static_cast<int>(yytokentype::KW_PARA);
+"hasta"							return static_cast<int>(yytokentype::KW_HASTA);
+"haga"							return static_cast<int>(yytokentype::KW_HAGA);
+"repita"						return static_cast<int>(yytokentype::KW_REPITA);
+"procedimiento"					return static_cast<int>(yytokentype::KW_PROCEDIMIENTO);
+"var"							return static_cast<int>(yytokentype::KW_VAR);
+"funcion"						return static_cast<int>(yytokentype::KW_FUNCION);
+"arreglo"						return static_cast<int>(yytokentype::KW_ARREGLO);
+"de"							return static_cast<int>(yytokentype::KW_DE);
+"retorne"						return static_cast<int>(yytokentype::KW_RETORNE);
+"tipo"							return static_cast<int>(yytokentype::KW_TIPO);
+"es"							return static_cast<int>(yytokentype::KW_ES);
+"verdadero"						return static_cast<int>(yytokentype::KW_VERDADERO);
+"falso"							return static_cast<int>(yytokentype::KW_FALSO);
+"no"							return static_cast<int>(yytokentype::KW_NO);
 
-\'.\' 							return 1;
-\".*\" 							return 1;
+\'.\' 							yylval = new StringLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
+\".*\" 							yylval = new CharacterLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
 
 "+"								return static_cast<int>(Token::OP_ADD);
 "-"								return static_cast<int>(Token::OP_SUB);
@@ -73,19 +77,20 @@
 "//" 							BEGIN(LINE_COMMENT);
 "/*" 							BEGIN(BLOCK_COMMENT);
 
-[0-9]+							return 1;
-[_a-z][_a-z0-9]*				return 1;
-"<-"							return 1;
-">="							return 1;
-"<="							return 1;
+[0-9]+							yylval = new NumberNode(std::stoi(get_lexeme())); return static_cast<int>(yytokentype::TK_NUMBER);
+[_a-z][_a-z0-9]*				yylval = new StringNode(get_lexeme()); return static_cast<int>(yytokentype::TK_ID);
+"<-"							return static_cast<int>(yytokentype::TK_ASSIGN);
+">="							return static_cast<int>(yytokentype::TK_GToE);
+"<="							return static_cast<int>(yytokentype::TK_LToE);
+"<>"							return static_cast<int>(yytokentype::TK_NEQU);
 
-[ ] 							;
-\n								return 1;
+[ \t] 							;
+\n								return static_cast<int>(Token::TK_EOL);
 <INITIAL,LINE_COMMENT><<EOF>>	yyterminate();
 .								return static_cast<int>(Token::TK_UNKNOWN);
 
 <LINE_COMMENT>.					;
-<LINE_COMMENT>\n 				BEGIN(INITIAL);
+<LINE_COMMENT>\n 				BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
 
 <BLOCK_COMMENT>(.|\n)			;
 <BLOCK_COMMENT><<EOF>>			YY_FATAL_ERROR("Unclosed block comment");

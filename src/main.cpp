@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "./lexer/lexer.hpp"
+#include "parser.hpp"
+
+std::ifstream in;
 
 int main(int argc, char *argv[])
 {
@@ -10,7 +12,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::ifstream in = std::ifstream(argv[1], std::ios::in);
+	in = std::ifstream(argv[1], std::ios::in);
 
 	if (!in.is_open())
 	{
@@ -18,19 +20,14 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	Lexer lexer(in);
-
-	int token = lexer.get_next_token();
-	while (token != 0)
+	ASTNode *program_node;
+	if (yyparse(&program_node))
 	{
-		if (token == static_cast<int>(Token::TK_UNKNOWN))
-		{
-			std::cout << "Unkown token " << lexer.get_lexeme() << std::endl;
-			return 1;
-		}
-		std::cout << lexer.get_lexeme() << " " << token << std::endl;
-		token = lexer.get_next_token();
+		return 1;
 	}
 
+	std::cout << program_node->to_string() << std::endl;
+
+	delete program_node;
 	return 0;
 }
