@@ -5,6 +5,22 @@
 #include <string>
 #include <list>
 
+#define DEFINE_BINARY_EXPR(name, prec, oper)       \
+	class name##Expr : public BinaryExpr           \
+	{                                              \
+	  public:                                      \
+		name##Expr(ASTNode *expr1, ASTNode *expr2) \
+			: BinaryExpr(expr1, expr2) {}          \
+		int get_precedence()                       \
+		{                                          \
+			return prec;                           \
+		}                                          \
+		std::string get_oper()                     \
+		{                                          \
+			return oper;                           \
+		}                                          \
+	};
+
 enum class TypeEnum : unsigned int
 {
 	Entero = 1,
@@ -85,12 +101,30 @@ class StringNode : public ASTNode
   public:
 	StringNode(std::string id)
 		: id(id) {}
-	std::string to_string() override { return id; }
+	std::string to_string() override
+	{
+		return id;
+	}
 
 	std::string id;
 };
 
-class NumberNode : public ASTNode
+class Expr : public ASTNode
+{
+  public:
+	Expr() {}
+	virtual std::string to_string() = 0;
+	std::string get_oper()
+	{
+		return "";
+	}
+	int get_precedence()
+	{
+		return 255;
+	}
+};
+
+class NumberNode : public Expr
 {
   public:
 	NumberNode(int number)
@@ -200,6 +234,141 @@ class ArgumentDecl : public ASTNode
 	ASTNode *type;
 	ASTNode *id;
 	bool var;
+};
+
+class StatementList : public ASTNode
+{
+  public:
+	StatementList(std::list<ASTNode *> statements)
+		: statements(statements) {}
+	std::string to_string() override;
+
+	std::list<ASTNode *> statements;
+};
+
+class AssignStatement : public ASTNode
+{
+  public:
+	AssignStatement(ASTNode *lvalue,
+					ASTNode *expr)
+		: lvalue(lvalue),
+		  expr(expr) {}
+	std::string to_string() override;
+
+	ASTNode *lvalue;
+	ASTNode *expr;
+};
+
+class LeftValue : public Expr
+{
+  public:
+	LeftValue(ASTNode *id,
+			  ASTNode *index)
+		: id(id),
+		  index(index) {}
+	std::string to_string() override;
+
+	ASTNode *id;
+	ASTNode *index;
+};
+
+class BinaryExpr : public Expr
+{
+  public:
+	BinaryExpr(ASTNode *expr1,
+			   ASTNode *expr2)
+		: expr1(expr1),
+		  expr2(expr2) {}
+	std::string to_string() override;
+	virtual std::string get_oper() = 0;
+	virtual int get_precedence() = 0;
+
+	ASTNode *expr1;
+	ASTNode *expr2;
+};
+
+DEFINE_BINARY_EXPR(Equal, 0, "=");
+DEFINE_BINARY_EXPR(NotEqual, 0, "<>");
+DEFINE_BINARY_EXPR(LessThan, 0, "<");
+DEFINE_BINARY_EXPR(GreaterThan, 0, ">");
+DEFINE_BINARY_EXPR(LessThanOrEqual, 0, "<=");
+DEFINE_BINARY_EXPR(GreaterThanOrEqual, 0, ">=");
+DEFINE_BINARY_EXPR(Addition, 1, "+");
+DEFINE_BINARY_EXPR(Subtraction, 1, "-");
+DEFINE_BINARY_EXPR(Or, 1, "o");
+DEFINE_BINARY_EXPR(Multiplication, 2, "*");
+DEFINE_BINARY_EXPR(Division, 2, "div");
+DEFINE_BINARY_EXPR(Mod, 2, "mod");
+DEFINE_BINARY_EXPR(And, 2, "y");
+DEFINE_BINARY_EXPR(Power, 3, "^");
+
+class NegativeExpr : public Expr
+{
+  public:
+	NegativeExpr(ASTNode *expr)
+		: expr(expr) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
+};
+
+class StringLiteralNode : public ASTNode
+{
+  public:
+	StringLiteralNode(std::string string_literal)
+		: string_literal(string_literal) {}
+	std::string to_string() override
+	{
+		return string_literal;
+	}
+
+	std::string string_literal;
+};
+
+class CharacterLiteralNode : public Expr
+{
+  public:
+	CharacterLiteralNode(std::string character_literal)
+		: character_literal(character_literal) {}
+	std::string to_string() override
+	{
+		return character_literal;
+	}
+
+	std::string character_literal;
+};
+
+class BooleanNode : public Expr
+{
+  public:
+	BooleanNode(bool boolean)
+		: boolean(boolean) {}
+	std::string to_string() override;
+
+	bool boolean;
+};
+
+class SubprogramCall : public Expr
+{
+  public:
+	SubprogramCall(ASTNode *id,
+				   ASTNode *argument_list)
+		: id(id),
+		  argument_list(argument_list) {}
+	std::string to_string() override;
+
+	ASTNode *id;
+	ASTNode *argument_list;
+};
+
+class ArgumentList : public ASTNode
+{
+  public:
+	ArgumentList(std::list<ASTNode *> arguments)
+		: arguments(arguments) {}
+	std::string to_string() override;
+
+	std::list<ASTNode *> arguments;
 };
 
 #endif

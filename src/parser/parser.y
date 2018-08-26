@@ -168,12 +168,17 @@ argument-decl-list			:	argument-decl-list ',' type TK_ID					{
 procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = new SubprogramDeclHeader($2, $3, NULL); }
 ;
 statement-list.opt			:	%empty												{ $$ = NULL; }
-							|	statement-list eols 								{ $$ = NULL; }
+							|	statement-list eols 								{ $$ = $1; }
 ;
-statement-list				:	statement-list eols statement						{ $$ = NULL; }
-							|	statement											{ $$ = NULL; }
+statement-list				:	statement-list eols statement						{
+																						std::list<ASTNode *> statements;
+																						statements.push_back($1);
+																						statements.push_back($3);
+																						$$ = new StatementList(statements);
+																					}
+							|	statement											{ $$ = $1; }
 ;
-statement					:	assign												{ $$ = NULL; }
+statement					:	assign												{ $$ = $1; }
 							|	"llamar" subprogram-call							{ $$ = NULL; }
 							|	"llamar" TK_ID										{ $$ = NULL; }
 							|	"si" expr "entonces"
@@ -211,51 +216,56 @@ else.opt					:	%empty												{ $$ = NULL; }
 								eols.opt
 								statement-list.opt									{ $$ = NULL; }
 ;
-assign						:	lvalue "<-" expr									{ $$ = NULL; }
+assign						:	lvalue "<-" expr									{ $$ = new AssignStatement($1, $3); }
 ;
-lvalue						:	TK_ID												{ $$ = NULL; }
-							|	TK_ID '[' expr ']'									{ $$ = NULL; }
+lvalue						:	TK_ID												{ $$ = new LeftValue($1, NULL); }
+							|	TK_ID '[' expr ']'									{ $$ = new LeftValue($1, $3); }
 ;
-expr						:	expr '=' term										{ $$ = NULL; }
-							|	expr "<>" term										{ $$ = NULL; }
-							|	expr '<' term										{ $$ = NULL; }
-							|	expr '>' term										{ $$ = NULL; }
-							|	expr ">=" term										{ $$ = NULL; }
-							|	expr "<=" term										{ $$ = NULL; }
-							|	term												{ $$ = NULL; }
+expr						:	expr '=' term										{ $$ = new EqualExpr($1, $3); }
+							|	expr "<>" term										{ $$ = new NotEqualExpr($1, $3); }
+							|	expr '<' term										{ $$ = new LessThanExpr($1, $3); }
+							|	expr '>' term										{ $$ = new GreaterThanExpr($1, $3); }
+							|	expr "<=" term										{ $$ = new LessThanOrEqualExpr($1, $3); }
+							|	expr ">=" term										{ $$ = new GreaterThanOrEqualExpr($1, $3); }
+							|	term												{ $$ = $1; }
 ;
-term						:	term '+' factor										{ $$ = NULL; }
-							|	term '-' factor										{ $$ = NULL; }
-							|	term 'o' factor										{ $$ = NULL; }
-							|	factor												{ $$ = NULL; }
+term						:	term '+' factor										{ $$ = new AdditionExpr($1, $3); }
+							|	term '-' factor										{ $$ = new SubtractionExpr($1, $3); }
+							|	term 'o' factor										{ $$ = new OrExpr($1, $3); }
+							|	factor												{ $$ = $1; }
 ;
-factor						:	factor '*' exponent									{ $$ = NULL; }
-							|	factor "div" exponent								{ $$ = NULL; }
-							|	factor "mod" exponent								{ $$ = NULL; }
-							|	factor 'y' exponent									{ $$ = NULL; }
-							|	exponent
+factor						:	factor '*' exponent									{ $$ = new MultiplicationExpr($1, $3); }
+							|	factor "div" exponent								{ $$ = new DivisionExpr($1, $3); }
+							|	factor "mod" exponent								{ $$ = new ModExpr($1, $3); }
+							|	factor 'y' exponent									{ $$ = new AndExpr($1, $3); }
+							|	exponent											{ $$ = $1; }
 ;
-exponent					:	exponent '^' rvalue									{ $$ = NULL; }
-							|	rvalue												{ $$ = NULL; }
+exponent					:	exponent '^' rvalue									{ $$ = new PowerExpr($1, $3); }
+							|	rvalue												{ $$ = $1; }
 ;
-rvalue						:	'(' expr ')'										{ $$ = NULL; }
-							|	constant											{ $$ = NULL; }
-							|	'-' expr											{ $$ = NULL; }
-							|	lvalue												{ $$ = NULL; }
-							|	subprogram-call										{ $$ = NULL; }
+rvalue						:	'(' expr ')'										{ $$ = $2; }
+							|	constant											{ $$ = $1; }
+							|	'-' expr											{ $$ = new NegativeExpr($2); }
+							|	lvalue												{ $$ = $1; }
+							|	subprogram-call										{ $$ = $1; }
 ;
-constant					:	TK_NUMBER											{ $$ = NULL; }
-							|	TK_CHARACTER_LITERAL								{ $$ = NULL; }
-							|	"verdadero"											{ $$ = NULL; }
-							|	"falso"												{ $$ = NULL; }
+constant					:	TK_NUMBER											{ $$ = $1; }
+							|	TK_CHARACTER_LITERAL								{ $$ = $1; }
+							|	"verdadero"											{ $$ = new BooleanNode(true); }
+							|	"falso"												{ $$ = new BooleanNode(false); }
 ;
-subprogram-call				:	TK_ID '(' argument-list.opt ')'						{ $$ = NULL; }
+subprogram-call				:	TK_ID '(' argument-list.opt ')'						{ $$ = new SubprogramCall($1, $3); }
 ;
 argument-list.opt			:	%empty												{ $$ = NULL; }
-							|	argument-list										{ $$ = NULL; }
+							|	argument-list										{ $$ = $1; }
 ;
-argument-list				:	argument-list ',' expr								{ $$ = NULL; }
-							|	expr												{ $$ = NULL; }
+argument-list				:	argument-list ',' expr								{
+																						std::list<ASTNode *> arguments;
+																						arguments.push_back($1);
+																						arguments.push_back($3);
+																						$$ = new ArgumentList(arguments);
+																					}
+							|	expr												{ $$ = $1; }
 ;
 
 %%

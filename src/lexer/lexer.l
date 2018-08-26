@@ -53,8 +53,8 @@
 "falso"							return static_cast<int>(yytokentype::KW_FALSO);
 "no"							return static_cast<int>(yytokentype::KW_NO);
 
-\'.\' 							return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
-\".*\" 							return static_cast<int>(yytokentype::TK_STRING_LITERAL);
+\'.\' 							yylval = new StringLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
+\".*\" 							yylval = new CharacterLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
 
 "+"								return static_cast<int>(Token::OP_ADD);
 "-"								return static_cast<int>(Token::OP_SUB);

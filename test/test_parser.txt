@@ -27,7 +27,7 @@
         Fin
 */
 
-Tipo TCampoMinas es arreglo[11] de Entero
+/*Tipo TCampoMinas es arreglo[11] de Entero
 Tipo TCampoMinas es Entero
 Tipo TCampoMinas es arreglo[11] de Booleano
 Tipo TCampoMinas es caracter
@@ -90,7 +90,7 @@ Inicio
         Retorne n*-1
     Fin Si
     Retorne n
-Fin
+Fin*/
 
 Inicio
     origen[1] <- 192

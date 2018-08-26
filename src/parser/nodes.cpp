@@ -209,3 +209,115 @@ std::string ArgumentDecl::to_string()
 	argument_decl_str += id->to_string();
 	return argument_decl_str;
 }
+
+std::string StatementList::to_string()
+{
+	std::string statement_list_str = "";
+	for (auto statement : statements)
+	{
+		if (statement != NULL) // remove
+			statement_list_str += statement->to_string();
+	}
+	return statement_list_str;
+}
+
+std::string AssignStatement::to_string()
+{
+	std::string assign_statement_str = "";
+	assign_statement_str += lvalue->to_string();
+	assign_statement_str += " <- ";
+	assign_statement_str += expr->to_string();
+	assign_statement_str += "\n";
+	return assign_statement_str;
+}
+std::string LeftValue::to_string()
+{
+	std::string left_value_str = "";
+	left_value_str += id->to_string();
+	if (index != NULL)
+	{
+		left_value_str += "[";
+		left_value_str += index->to_string();
+		left_value_str += "]";
+	}
+	return left_value_str;
+}
+
+std::string BinaryExpr::to_string()
+{
+	std::string binary_expr_str = "";
+	Expr *expr_expr1 = static_cast<Expr *>(expr1);
+	Expr *expr_expr2 = static_cast<Expr *>(expr2);
+	std::string string1 = expr1->to_string();
+	std::string string2 = expr2->to_string();
+
+	if (get_precedence() > expr_expr1->get_precedence())
+	{
+		string1 = "( " + string1 + " )";
+	}
+	if (get_precedence() > expr_expr2->get_precedence())
+	{
+		string2 = "( " + string2 + " )";
+	}
+
+	binary_expr_str += string1 + " " + this->get_oper() + " " + string2;
+	return binary_expr_str;
+}
+
+std::string NegativeExpr::to_string()
+{
+	std::string negative_expr_str = "-";
+	negative_expr_str += expr->to_string();
+	return negative_expr_str;
+}
+
+std::string BooleanNode::to_string()
+{
+	std::string boolean_node_str = "";
+	if (boolean)
+	{
+		boolean_node_str += "verdadero";
+	}
+	else
+	{
+		boolean_node_str += "falso";
+	}
+	return boolean_node_str;
+}
+
+std::string SubprogramCall::to_string()
+{
+	std::string subprogram_call_str = "";
+	subprogram_call_str += id->to_string();
+	subprogram_call_str += "(";
+	if (argument_list != NULL)
+	{
+		subprogram_call_str += argument_list->to_string();
+	}
+	subprogram_call_str += ")";
+	return subprogram_call_str;
+}
+
+std::string ArgumentList::to_string()
+{
+	std::string argument_list_str = "";
+	if (arguments.size() > 1)
+	{
+		for (auto argument : arguments)
+		{
+			if (argument != arguments.back())
+			{
+				argument_list_str += argument->to_string() + ", ";
+			}
+			else
+			{
+				argument_list_str += argument->to_string();
+			}
+		}
+	}
+	else if (!arguments.empty())
+	{
+		argument_list_str = arguments.front()->to_string();
+	}
+	return argument_list_str;
+}
