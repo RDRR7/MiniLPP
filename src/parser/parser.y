@@ -179,42 +179,52 @@ statement-list				:	statement-list eols statement						{
 							|	statement											{ $$ = $1; }
 ;
 statement					:	assign												{ $$ = $1; }
-							|	"llamar" subprogram-call							{ $$ = NULL; }
-							|	"llamar" TK_ID										{ $$ = NULL; }
+							|	"llamar" subprogram-call							{ $$ = new CallStatement($2); }
+							|	"llamar" TK_ID										{ $$ = new CallStatement($2); }
 							|	"si" expr "entonces"
 								eols.opt
 								statement-list.opt
 								else.opt
-								"fin" "si"											{ $$ = NULL; }
+								"fin" "si"											{ $$ = new IfStatement($2, $5, $6); }
 							|	"mientras" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"									{ $$ = NULL; }
+								"fin" "mientras"									{ $$ = new WhileStatement($2, $5, false); }
 							|	"mientras" "no" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"									{ $$ = NULL; }
+								"fin" "mientras"									{ $$ = new WhileStatement($3, $6, true); }
 							|	"para" assign "hasta" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "para"										{ $$ = NULL; }
+								"fin" "para"										{ $$ = new ForStatement($2, $4, $7); }
 							|	"repita"
 								eols.opt
 								statement-list.opt
-								"hasta" expr										{ $$ = NULL; }
-							|	"retorne" expr										{ $$ = NULL; }
-							|	"escriba" argument-list-with-string					{ $$ = NULL; }
-							|	"lea" lvalue										{ $$ = NULL; }
+								"hasta" expr										{ $$ = new NotDoWhileStatement($5, $3); }
+							|	"retorne" expr										{ $$ = new ReturnNode($2); }
+							|	"escriba" argument-list-with-string					{ $$ = new WriteNode($2); }
+							|	"lea" lvalue										{ $$ = new ReadNode($2); }
 ;
-argument-list-with-string	:	argument-list-with-string ',' expr					{ $$ = NULL; }
-							|	argument-list-with-string ',' TK_STRING_LITERAL		{ $$ = NULL; }
-							|	expr												{ $$ = NULL; }
-							|	TK_STRING_LITERAL									{ $$ = NULL; }
+argument-list-with-string	:	argument-list-with-string ',' expr					{
+																						std::list<ASTNode *> arguments;
+																						arguments.push_back($1);
+																						arguments.push_back($3);
+																						$$ = new ArgumentList(arguments);
+																					}
+							|	argument-list-with-string ',' TK_STRING_LITERAL		{
+																						std::list<ASTNode *> arguments;
+																						arguments.push_back($1);
+																						arguments.push_back($3);
+																						$$ = new ArgumentList(arguments);
+							 														}
+							|	expr												{ $$ = $1; }
+							|	TK_STRING_LITERAL									{ $$ = $1; }
 ;
 else.opt					:	%empty												{ $$ = NULL; }
 							|	"sino"
 								eols.opt
-								statement-list.opt									{ $$ = NULL; }
+								statement-list.opt									{ $$ = new ElseStatement($3); }
 ;
 assign						:	lvalue "<-" expr									{ $$ = new AssignStatement($1, $3); }
 ;

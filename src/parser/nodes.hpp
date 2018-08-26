@@ -118,7 +118,7 @@ class Expr : public ASTNode
 	{
 		return "";
 	}
-	int get_precedence()
+	virtual int get_precedence()
 	{
 		return 255;
 	}
@@ -369,6 +369,117 @@ class ArgumentList : public ASTNode
 	std::string to_string() override;
 
 	std::list<ASTNode *> arguments;
+};
+
+class CallStatement : public ASTNode
+{
+  public:
+	CallStatement(ASTNode *call)
+		: call(call) {}
+	std::string to_string() override;
+
+	ASTNode *call;
+};
+
+class IfStatement : public ASTNode
+{
+  public:
+	IfStatement(ASTNode *expr,
+				ASTNode *statement_list,
+				ASTNode *else_statement)
+		: expr(expr),
+		  statement_list(statement_list),
+		  else_statement(else_statement) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
+	ASTNode *statement_list;
+	ASTNode *else_statement;
+};
+
+class ElseStatement : public ASTNode
+{
+  public:
+	ElseStatement(ASTNode *statement_list)
+		: statement_list(statement_list) {}
+	std::string to_string() override;
+
+	ASTNode *statement_list;
+};
+
+class WhileStatement : public ASTNode
+{
+  public:
+	WhileStatement(ASTNode *expr,
+				   ASTNode *statement_list,
+				   bool no)
+		: expr(expr),
+		  statement_list(statement_list),
+		  no(no) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
+	ASTNode *statement_list;
+	bool no;
+};
+
+class ForStatement : public ASTNode
+{
+  public:
+	ForStatement(ASTNode *assign,
+				 ASTNode *expr,
+				 ASTNode *statement_list)
+		: assign(assign),
+		  expr(expr),
+		  statement_list(statement_list) {}
+	std::string to_string() override;
+
+	ASTNode *assign;
+	ASTNode *expr;
+	ASTNode *statement_list;
+};
+
+class NotDoWhileStatement : public ASTNode
+{
+  public:
+	NotDoWhileStatement(ASTNode *expr,
+						ASTNode *statement_list)
+		: expr(expr),
+		  statement_list(statement_list) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
+	ASTNode *statement_list;
+};
+
+class ReturnNode : public ASTNode
+{
+  public:
+	ReturnNode(ASTNode *expr)
+		: expr(expr) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
+};
+
+class WriteNode : public ASTNode
+{
+  public:
+	WriteNode(ASTNode *argument_list)
+		: argument_list(argument_list) {}
+	std::string to_string() override;
+
+	ASTNode *argument_list;
+};
+
+class ReadNode : public ASTNode
+{
+  public:
+	ReadNode(ASTNode *expr)
+		: expr(expr) {}
+	std::string to_string() override;
+
+	ASTNode *expr;
 };
 
 #endif

@@ -321,3 +321,108 @@ std::string ArgumentList::to_string()
 	}
 	return argument_list_str;
 }
+
+std::string CallStatement::to_string()
+{
+	std::string call_statement_str = "llamar ";
+	call_statement_str += call->to_string();
+	call_statement_str += "\n";
+	return call_statement_str;
+}
+
+std::string IfStatement::to_string()
+{
+	std::string if_statement_str = "si ";
+	if_statement_str += expr->to_string();
+	if_statement_str += " entonces\n";
+	if (statement_list != NULL)
+	{
+		if_statement_str += statement_list->to_string();
+	}
+	if (else_statement != NULL)
+	{
+		if_statement_str += else_statement->to_string();
+	}
+	if_statement_str += "fin si\n";
+	return if_statement_str;
+}
+
+std::string ElseStatement::to_string()
+{
+	std::string else_statement_str = "sino\n";
+	if (statement_list != NULL)
+	{
+		else_statement_str += statement_list->to_string();
+	}
+	return else_statement_str;
+}
+
+std::string WhileStatement::to_string()
+{
+	std::string while_statement_str = "mientras ";
+	if (no)
+	{
+		while_statement_str += "no ";
+	}
+	while_statement_str += expr->to_string();
+	while_statement_str += " haga\n";
+	if (statement_list != NULL)
+	{
+		while_statement_str += statement_list->to_string();
+	}
+	while_statement_str += "fin mientras\n";
+	return while_statement_str;
+}
+
+std::string ForStatement::to_string()
+{
+	std::string for_statement_str = "para ";
+	for_statement_str += assign->to_string();
+	for_statement_str.erase(for_statement_str.end() - 1);
+	for_statement_str += " hasta ";
+	for_statement_str += expr->to_string();
+	for_statement_str += " haga\n";
+	if (statement_list != NULL)
+	{
+		for_statement_str += statement_list->to_string();
+	}
+	for_statement_str += "fin para\n";
+	return for_statement_str;
+}
+
+std::string NotDoWhileStatement::to_string()
+{
+	std::string not_do_while_statement_str = "repita\n";
+	if (statement_list != NULL)
+	{
+		not_do_while_statement_str += statement_list->to_string();
+	}
+	not_do_while_statement_str += "hasta ";
+	not_do_while_statement_str += expr->to_string();
+	not_do_while_statement_str += "\n";
+	return not_do_while_statement_str;
+}
+
+std::string ReturnNode::to_string()
+{
+	std::string return_node_str = "retorne ";
+	return_node_str += expr->to_string();
+	return_node_str += "\n";
+	return return_node_str;
+}
+
+std::string WriteNode::to_string()
+{
+	std::string write_node_str = "escriba ";
+	write_node_str += argument_list->to_string();
+	write_node_str += "\n";
+	return write_node_str;
+}
+
+std::string ReadNode::to_string()
+{
+	std::string read_node_str = "lea ";
+	read_node_str += expr->to_string();
+	read_node_str += "\n";
+	return read_node_str;
+}
