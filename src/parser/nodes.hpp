@@ -34,6 +34,7 @@ class ASTNode
 {
   public:
 	ASTNode() {}
+	virtual ~ASTNode() {}
 	virtual std::string to_string() = 0;
 };
 
@@ -48,6 +49,13 @@ class ProgramNode : public ASTNode
 		  variable_section(variable_section),
 		  subprogram_decl(subprogram_decl),
 		  statement_list(statement_list) {}
+	~ProgramNode() override
+	{
+		delete type_definition_section;
+		delete variable_section;
+		delete subprogram_decl;
+		delete statement_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *type_definition_section;
@@ -61,6 +69,14 @@ class TypeDefinitionSection : public ASTNode
   public:
 	TypeDefinitionSection(std::list<ASTNode *> type_definitions)
 		: type_definitions(type_definitions) {}
+	~TypeDefinitionSection() override
+	{
+		while (!type_definitions.empty())
+		{
+			delete type_definitions.front();
+			type_definitions.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> type_definitions;
@@ -69,8 +85,15 @@ class TypeDefinitionSection : public ASTNode
 class TypeDefinition : public ASTNode
 {
   public:
-	TypeDefinition(ASTNode *id, ASTNode *type)
-		: id(id), type(type) {}
+	TypeDefinition(ASTNode *id,
+				   ASTNode *type)
+		: id(id),
+		  type(type) {}
+	~TypeDefinition() override
+	{
+		delete id;
+		delete type;
+	}
 	std::string to_string();
 
 	ASTNode *id;
@@ -88,6 +111,12 @@ class Type : public ASTNode
 		  array_size(array_size),
 		  user_type(user_type),
 		  array_type(array_type) {}
+	~Type() override
+	{
+		delete array_size;
+		delete user_type;
+		delete array_type;
+	}
 	std::string to_string() override;
 
 	TypeEnum type;
@@ -142,6 +171,14 @@ class VariableSectionList : public ASTNode
   public:
 	VariableSectionList(std::list<ASTNode *> variable_sections)
 		: variable_sections(variable_sections) {}
+	~VariableSectionList() override
+	{
+		while (!variable_sections.empty())
+		{
+			delete variable_sections.front();
+			variable_sections.pop_front();
+		}
+	}
 	std::string to_string();
 
 	std::list<ASTNode *> variable_sections;
@@ -150,8 +187,15 @@ class VariableSectionList : public ASTNode
 class VariableSection : public ASTNode
 {
   public:
-	VariableSection(ASTNode *ids, ASTNode *type)
-		: ids(ids), type(type) {}
+	VariableSection(ASTNode *ids,
+					ASTNode *type)
+		: ids(ids),
+		  type(type) {}
+	~VariableSection() override
+	{
+		delete ids;
+		delete type;
+	}
 	std::string to_string() override;
 
 	ASTNode *ids;
@@ -163,6 +207,14 @@ class IdList : public ASTNode
   public:
 	IdList(std::list<ASTNode *> ids)
 		: ids(ids) {}
+	~IdList() override
+	{
+		while (!ids.empty())
+		{
+			delete ids.front();
+			ids.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> ids;
@@ -173,6 +225,14 @@ class SubprogramDeclList : public ASTNode
   public:
 	SubprogramDeclList(std::list<ASTNode *> subprogram_decls)
 		: subprogram_decls(subprogram_decls) {}
+	~SubprogramDeclList()
+	{
+		while (!subprogram_decls.empty())
+		{
+			delete subprogram_decls.front();
+			subprogram_decls.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> subprogram_decls;
@@ -187,6 +247,12 @@ class SubprogramDecl : public ASTNode
 		: header(header),
 		  variable_section(variable_section),
 		  statements(statements) {}
+	~SubprogramDecl() override
+	{
+		delete header;
+		delete variable_section;
+		delete statements;
+	}
 	std::string to_string() override;
 
 	ASTNode *header;
@@ -203,6 +269,12 @@ class SubprogramDeclHeader : public ASTNode
 		: id(id),
 		  arguments(arguments),
 		  type(type) {}
+	~SubprogramDeclHeader() override
+	{
+		delete id;
+		delete arguments;
+		delete type;
+	}
 	std::string to_string() override;
 
 	ASTNode *id;
@@ -215,6 +287,14 @@ class ArgumentDeclList : public ASTNode
   public:
 	ArgumentDeclList(std::list<ASTNode *> arguments_decls)
 		: arguments_decls(arguments_decls) {}
+	~ArgumentDeclList() override
+	{
+		while (!arguments_decls.empty())
+		{
+			delete arguments_decls.front();
+			arguments_decls.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> arguments_decls;
@@ -229,6 +309,11 @@ class ArgumentDecl : public ASTNode
 		: type(type),
 		  id(id),
 		  var(var) {}
+	~ArgumentDecl() override
+	{
+		delete type;
+		delete id;
+	}
 	std::string to_string() override;
 
 	ASTNode *type;
@@ -241,6 +326,14 @@ class StatementList : public ASTNode
   public:
 	StatementList(std::list<ASTNode *> statements)
 		: statements(statements) {}
+	~StatementList() override
+	{
+		while (!statements.empty())
+		{
+			delete statements.front();
+			statements.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> statements;
@@ -253,6 +346,11 @@ class AssignStatement : public ASTNode
 					ASTNode *expr)
 		: lvalue(lvalue),
 		  expr(expr) {}
+	~AssignStatement() override
+	{
+		delete lvalue;
+		delete expr;
+	}
 	std::string to_string() override;
 
 	ASTNode *lvalue;
@@ -266,6 +364,11 @@ class LeftValue : public Expr
 			  ASTNode *index)
 		: id(id),
 		  index(index) {}
+	~LeftValue() override
+	{
+		delete id;
+		delete index;
+	}
 	std::string to_string() override;
 
 	ASTNode *id;
@@ -279,6 +382,11 @@ class BinaryExpr : public Expr
 			   ASTNode *expr2)
 		: expr1(expr1),
 		  expr2(expr2) {}
+	~BinaryExpr() override
+	{
+		delete expr1;
+		delete expr2;
+	}
 	std::string to_string() override;
 	virtual std::string get_oper() = 0;
 	virtual int get_precedence() = 0;
@@ -307,6 +415,10 @@ class NegativeExpr : public Expr
   public:
 	NegativeExpr(ASTNode *expr)
 		: expr(expr) {}
+	~NegativeExpr() override
+	{
+		delete expr;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;
@@ -355,6 +467,11 @@ class SubprogramCall : public Expr
 				   ASTNode *argument_list)
 		: id(id),
 		  argument_list(argument_list) {}
+	~SubprogramCall() override
+	{
+		delete id;
+		delete argument_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *id;
@@ -366,6 +483,14 @@ class ArgumentList : public ASTNode
   public:
 	ArgumentList(std::list<ASTNode *> arguments)
 		: arguments(arguments) {}
+	~ArgumentList() override
+	{
+		while (!arguments.empty())
+		{
+			delete arguments.front();
+			arguments.pop_front();
+		}
+	}
 	std::string to_string() override;
 
 	std::list<ASTNode *> arguments;
@@ -376,6 +501,10 @@ class CallStatement : public ASTNode
   public:
 	CallStatement(ASTNode *call)
 		: call(call) {}
+	~CallStatement() override
+	{
+		delete call;
+	}
 	std::string to_string() override;
 
 	ASTNode *call;
@@ -390,6 +519,12 @@ class IfStatement : public ASTNode
 		: expr(expr),
 		  statement_list(statement_list),
 		  else_statement(else_statement) {}
+	~IfStatement() override
+	{
+		delete expr;
+		delete statement_list;
+		delete else_statement;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;
@@ -402,6 +537,10 @@ class ElseStatement : public ASTNode
   public:
 	ElseStatement(ASTNode *statement_list)
 		: statement_list(statement_list) {}
+	~ElseStatement() override
+	{
+		delete statement_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *statement_list;
@@ -416,6 +555,11 @@ class WhileStatement : public ASTNode
 		: expr(expr),
 		  statement_list(statement_list),
 		  no(no) {}
+	~WhileStatement() override
+	{
+		delete expr;
+		delete statement_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;
@@ -432,6 +576,12 @@ class ForStatement : public ASTNode
 		: assign(assign),
 		  expr(expr),
 		  statement_list(statement_list) {}
+	~ForStatement() override
+	{
+		delete assign;
+		delete expr;
+		delete statement_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *assign;
@@ -446,6 +596,11 @@ class NotDoWhileStatement : public ASTNode
 						ASTNode *statement_list)
 		: expr(expr),
 		  statement_list(statement_list) {}
+	~NotDoWhileStatement() override
+	{
+		delete expr;
+		delete statement_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;
@@ -457,6 +612,10 @@ class ReturnNode : public ASTNode
   public:
 	ReturnNode(ASTNode *expr)
 		: expr(expr) {}
+	~ReturnNode() override
+	{
+		delete expr;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;
@@ -467,6 +626,10 @@ class WriteNode : public ASTNode
   public:
 	WriteNode(ASTNode *argument_list)
 		: argument_list(argument_list) {}
+	~WriteNode() override
+	{
+		delete argument_list;
+	}
 	std::string to_string() override;
 
 	ASTNode *argument_list;
@@ -477,6 +640,10 @@ class ReadNode : public ASTNode
   public:
 	ReadNode(ASTNode *expr)
 		: expr(expr) {}
+	~ReadNode() override
+	{
+		delete expr;
+	}
 	std::string to_string() override;
 
 	ASTNode *expr;

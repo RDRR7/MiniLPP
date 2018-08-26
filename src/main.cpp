@@ -20,10 +20,14 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (yyparse())
+	ASTNode *program_node;
+	if (yyparse(&program_node))
 	{
 		return 1;
 	}
 
+	std::cout << program_node->to_string() << std::endl;
+
+	delete program_node;
 	return 0;
 }

@@ -15,7 +15,7 @@ using YYSTYPE = ASTNode *;
 extern std::ifstream in;
 Lexer lexer(in);
 
-void yyerror(const char *msg);
+void yyerror(ASTNode **program_node, const char *msg);
 int yylex();
 
 %}
@@ -24,6 +24,7 @@ int yylex();
 %define parse.lac full
 %define parse.error verbose
 %expect 48
+%parse-param {ASTNode **program_node}
 
 %token TK_NUMBER			"numero"
 %token TK_ID				"id"
@@ -67,7 +68,7 @@ int yylex();
 
 %%
 
-start						:	program												{ std::cout << $1->to_string() << std::endl; }
+start						:	program												{ *program_node = $1; }
 ;
 program						:	eols.opt
 								type-definition-section.opt
@@ -280,8 +281,9 @@ argument-list				:	argument-list ',' expr								{
 
 %%
 
-void yyerror(const char *msg)
+void yyerror(ASTNode **program_node, const char *msg)
 {
+	delete[] program_node;
 	std::cerr << "[line " << lexer.get_line() << "]" << msg <<std::endl;
 }
 
