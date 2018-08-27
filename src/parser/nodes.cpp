@@ -154,12 +154,12 @@ std::string SubprogramDeclHeader::to_string()
 		subprogram_decl_header_str += "procedimiento ";
 	}
 	subprogram_decl_header_str += id->to_string();
-	subprogram_decl_header_str += "(";
 	if (arguments != NULL)
 	{
+		subprogram_decl_header_str += "(";
 		subprogram_decl_header_str += arguments->to_string();
+		subprogram_decl_header_str += ")";
 	}
-	subprogram_decl_header_str += ")";
 	if (type != NULL)
 	{
 		subprogram_decl_header_str += " : ";

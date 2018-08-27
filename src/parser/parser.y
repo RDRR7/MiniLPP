@@ -182,11 +182,11 @@ statement-list				:	statement-list eols statement						{
 statement					:	assign												{ $$ = $1; }
 							|	"llamar" subprogram-call							{ $$ = new CallStatement($2); }
 							|	"llamar" TK_ID										{ $$ = new CallStatement($2); }
-							|	"si" expr "entonces"
+							|	"si" expr eols.opt "entonces"
 								eols.opt
 								statement-list.opt
 								else.opt
-								"fin" "si"											{ $$ = new IfStatement($2, $5, $6); }
+								"fin" "si"											{ $$ = new IfStatement($2, $6, $7); }
 							|	"mientras" expr "haga"
 								eols.opt
 								statement-list.opt
@@ -283,7 +283,6 @@ argument-list				:	argument-list ',' expr								{
 
 void yyerror(ASTNode **program_node, const char *msg)
 {
-	delete[] program_node;
 	std::cerr << "[line " << lexer.get_line() << "]" << msg <<std::endl;
 }
 
