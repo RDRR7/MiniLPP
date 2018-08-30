@@ -85,14 +85,14 @@
 "<>"							return static_cast<int>(yytokentype::TK_NEQU);
 
 [ \t] 							;
-\n								return static_cast<int>(Token::TK_EOL);
+\r?\n							return static_cast<int>(Token::TK_EOL);
 <INITIAL,LINE_COMMENT><<EOF>>	yyterminate();
 .								return static_cast<int>(Token::TK_UNKNOWN);
 
 <LINE_COMMENT>.					;
-<LINE_COMMENT>\n 				BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
+<LINE_COMMENT>\r?\n 			BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
 
-<BLOCK_COMMENT>(.|\n)			;
+<BLOCK_COMMENT>(.|\r?\n)		;
 <BLOCK_COMMENT><<EOF>>			YY_FATAL_ERROR("Unclosed block comment");
 <BLOCK_COMMENT>"*/"				BEGIN(INITIAL);
 
