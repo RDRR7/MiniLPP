@@ -23,7 +23,7 @@ int yylex();
 %defines
 %define parse.lac full
 %define parse.error verbose
-%expect 48
+%expect 54
 %parse-param {ASTNode **program_node}
 
 %token TK_NUMBER			"numero"
@@ -190,11 +190,7 @@ statement					:	assign												{ $$ = $1; }
 							|	"mientras" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"									{ $$ = new WhileStatement($2, $5, false); }
-							|	"mientras" "no" expr "haga"
-								eols.opt
-								statement-list.opt
-								"fin" "mientras"									{ $$ = new WhileStatement($3, $6, true); }
+								"fin" "mientras"									{ $$ = new WhileStatement($2, $5); }
 							|	"para" assign "hasta" expr "haga"
 								eols.opt
 								statement-list.opt
@@ -259,6 +255,7 @@ rvalue						:	'(' expr ')'										{ $$ = $2; }
 							|	'-' expr											{ $$ = new NegativeExpr($2); }
 							|	lvalue												{ $$ = $1; }
 							|	subprogram-call										{ $$ = $1; }
+							|	"no" expr											{ $$ = new NegateExpr($2); }
 ;
 constant					:	TK_NUMBER											{ $$ = $1; }
 							|	TK_CHARACTER_LITERAL								{ $$ = $1; }

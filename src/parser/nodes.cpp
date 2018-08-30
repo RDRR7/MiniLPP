@@ -360,10 +360,6 @@ std::string ElseStatement::to_string()
 std::string WhileStatement::to_string()
 {
 	std::string while_statement_str = "mientras ";
-	if (no)
-	{
-		while_statement_str += "no ";
-	}
 	while_statement_str += expr->to_string();
 	while_statement_str += " haga\n";
 	if (statement_list != NULL)
@@ -425,4 +421,11 @@ std::string ReadNode::to_string()
 	read_node_str += expr->to_string();
 	read_node_str += "\n";
 	return read_node_str;
+}
+
+std::string NegateExpr::to_string()
+{
+	std::string negate_expr_str = "no ";
+	negate_expr_str += expr->to_string();
+	return negate_expr_str;
 }

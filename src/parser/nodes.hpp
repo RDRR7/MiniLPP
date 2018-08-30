@@ -550,11 +550,9 @@ class WhileStatement : public ASTNode
 {
   public:
 	WhileStatement(ASTNode *expr,
-				   ASTNode *statement_list,
-				   bool no)
+				   ASTNode *statement_list)
 		: expr(expr),
-		  statement_list(statement_list),
-		  no(no) {}
+		  statement_list(statement_list) {}
 	~WhileStatement() override
 	{
 		delete expr;
@@ -564,7 +562,6 @@ class WhileStatement : public ASTNode
 
 	ASTNode *expr;
 	ASTNode *statement_list;
-	bool no;
 };
 
 class ForStatement : public ASTNode
@@ -641,6 +638,20 @@ class ReadNode : public ASTNode
 	ReadNode(ASTNode *expr)
 		: expr(expr) {}
 	~ReadNode() override
+	{
+		delete expr;
+	}
+	std::string to_string() override;
+
+	ASTNode *expr;
+};
+
+class NegateExpr : public Expr
+{
+  public:
+	NegateExpr(ASTNode *expr)
+		: expr(expr) {}
+	~NegateExpr() override
 	{
 		delete expr;
 	}
