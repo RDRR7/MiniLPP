@@ -11,11 +11,11 @@
 	  public:                                      \
 		name##Expr(ASTNode *expr1, ASTNode *expr2) \
 			: BinaryExpr(expr1, expr2) {}          \
-		int get_precedence()                       \
+		int get_precedence() const                 \
 		{                                          \
 			return prec;                           \
 		}                                          \
-		std::string get_oper()                     \
+		std::string get_oper() const               \
 		{                                          \
 			return oper;                           \
 		}                                          \
@@ -35,7 +35,7 @@ class ASTNode
   public:
 	ASTNode() {}
 	virtual ~ASTNode() {}
-	virtual std::string to_string() = 0;
+	virtual std::string to_string() const = 0;
 };
 
 class ProgramNode : public ASTNode
@@ -56,8 +56,9 @@ class ProgramNode : public ASTNode
 		delete subprogram_decl;
 		delete statement_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *type_definition_section;
 	ASTNode *variable_section;
 	ASTNode *subprogram_decl;
@@ -77,8 +78,9 @@ class TypeDefinitionSection : public ASTNode
 			type_definitions.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> type_definitions;
 };
 
@@ -94,8 +96,9 @@ class TypeDefinition : public ASTNode
 		delete id;
 		delete type;
 	}
-	std::string to_string();
+	std::string to_string() const override;
 
+  private:
 	ASTNode *id;
 	ASTNode *type;
 };
@@ -117,8 +120,9 @@ class Type : public ASTNode
 		delete user_type;
 		delete array_type;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	TypeEnum type;
 	ASTNode *array_size;
 	ASTNode *user_type;
@@ -130,11 +134,12 @@ class StringNode : public ASTNode
   public:
 	StringNode(std::string id)
 		: id(id) {}
-	std::string to_string() override
+	std::string to_string() const override
 	{
 		return id;
 	}
 
+  private:
 	std::string id;
 };
 
@@ -142,12 +147,12 @@ class Expr : public ASTNode
 {
   public:
 	Expr() {}
-	virtual std::string to_string() = 0;
-	std::string get_oper()
+	virtual std::string to_string() const = 0;
+	std::string get_oper() const
 	{
 		return "";
 	}
-	virtual int get_precedence()
+	virtual int get_precedence() const
 	{
 		return 255;
 	}
@@ -158,11 +163,12 @@ class NumberNode : public Expr
   public:
 	NumberNode(int number)
 		: number(number) {}
-	std::string to_string() override
+	std::string to_string() const override
 	{
 		return std::to_string(number);
 	}
 
+  private:
 	int number;
 };
 
@@ -179,8 +185,9 @@ class VariableSectionList : public ASTNode
 			variable_sections.pop_front();
 		}
 	}
-	std::string to_string();
+	std::string to_string() const;
 
+  private:
 	std::list<ASTNode *> variable_sections;
 };
 
@@ -196,8 +203,9 @@ class VariableSection : public ASTNode
 		delete ids;
 		delete type;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *ids;
 	ASTNode *type;
 };
@@ -215,8 +223,9 @@ class IdList : public ASTNode
 			ids.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> ids;
 };
 
@@ -233,8 +242,9 @@ class SubprogramDeclList : public ASTNode
 			subprogram_decls.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> subprogram_decls;
 };
 
@@ -253,8 +263,9 @@ class SubprogramDecl : public ASTNode
 		delete variable_section;
 		delete statements;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *header;
 	ASTNode *variable_section;
 	ASTNode *statements;
@@ -275,8 +286,9 @@ class SubprogramDeclHeader : public ASTNode
 		delete arguments;
 		delete type;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *id;
 	ASTNode *arguments;
 	ASTNode *type;
@@ -295,8 +307,9 @@ class ArgumentDeclList : public ASTNode
 			arguments_decls.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> arguments_decls;
 };
 
@@ -314,8 +327,9 @@ class ArgumentDecl : public ASTNode
 		delete type;
 		delete id;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *type;
 	ASTNode *id;
 	bool var;
@@ -334,8 +348,9 @@ class StatementList : public ASTNode
 			statements.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> statements;
 };
 
@@ -351,8 +366,9 @@ class AssignStatement : public ASTNode
 		delete lvalue;
 		delete expr;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *lvalue;
 	ASTNode *expr;
 };
@@ -369,8 +385,9 @@ class LeftValue : public Expr
 		delete id;
 		delete index;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *id;
 	ASTNode *index;
 };
@@ -387,10 +404,11 @@ class BinaryExpr : public Expr
 		delete expr1;
 		delete expr2;
 	}
-	std::string to_string() override;
-	virtual std::string get_oper() = 0;
-	virtual int get_precedence() = 0;
+	std::string to_string() const override;
+	virtual std::string get_oper() const = 0;
+	virtual int get_precedence() const = 0;
 
+  private:
 	ASTNode *expr1;
 	ASTNode *expr2;
 };
@@ -419,8 +437,9 @@ class NegativeExpr : public Expr
 	{
 		delete expr;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 };
 
@@ -429,11 +448,12 @@ class StringLiteralNode : public ASTNode
   public:
 	StringLiteralNode(std::string string_literal)
 		: string_literal(string_literal) {}
-	std::string to_string() override
+	std::string to_string() const override
 	{
 		return string_literal;
 	}
 
+  private:
 	std::string string_literal;
 };
 
@@ -442,11 +462,12 @@ class CharacterLiteralNode : public Expr
   public:
 	CharacterLiteralNode(std::string character_literal)
 		: character_literal(character_literal) {}
-	std::string to_string() override
+	std::string to_string() const override
 	{
 		return character_literal;
 	}
 
+  private:
 	std::string character_literal;
 };
 
@@ -455,8 +476,9 @@ class BooleanNode : public Expr
   public:
 	BooleanNode(bool boolean)
 		: boolean(boolean) {}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	bool boolean;
 };
 
@@ -472,8 +494,9 @@ class SubprogramCall : public Expr
 		delete id;
 		delete argument_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *id;
 	ASTNode *argument_list;
 };
@@ -491,8 +514,9 @@ class ArgumentList : public ASTNode
 			arguments.pop_front();
 		}
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	std::list<ASTNode *> arguments;
 };
 
@@ -505,8 +529,9 @@ class CallStatement : public ASTNode
 	{
 		delete call;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *call;
 };
 
@@ -525,8 +550,9 @@ class IfStatement : public ASTNode
 		delete statement_list;
 		delete else_statement;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 	ASTNode *statement_list;
 	ASTNode *else_statement;
@@ -541,8 +567,9 @@ class ElseStatement : public ASTNode
 	{
 		delete statement_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *statement_list;
 };
 
@@ -558,8 +585,9 @@ class WhileStatement : public ASTNode
 		delete expr;
 		delete statement_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 	ASTNode *statement_list;
 };
@@ -579,8 +607,9 @@ class ForStatement : public ASTNode
 		delete expr;
 		delete statement_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *assign;
 	ASTNode *expr;
 	ASTNode *statement_list;
@@ -598,8 +627,9 @@ class NotDoWhileStatement : public ASTNode
 		delete expr;
 		delete statement_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 	ASTNode *statement_list;
 };
@@ -613,8 +643,9 @@ class ReturnNode : public ASTNode
 	{
 		delete expr;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 };
 
@@ -627,8 +658,9 @@ class WriteNode : public ASTNode
 	{
 		delete argument_list;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *argument_list;
 };
 
@@ -641,8 +673,9 @@ class ReadNode : public ASTNode
 	{
 		delete expr;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 };
 
@@ -655,8 +688,9 @@ class NegateExpr : public Expr
 	{
 		delete expr;
 	}
-	std::string to_string() override;
+	std::string to_string() const override;
 
+  private:
 	ASTNode *expr;
 };
 

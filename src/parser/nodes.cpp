@@ -1,6 +1,6 @@
 #include "nodes.hpp"
 
-std::string ProgramNode::to_string()
+std::string ProgramNode::to_string() const
 {
 	std::string program_str = "";
 	if (type_definition_section != NULL)
@@ -24,7 +24,7 @@ std::string ProgramNode::to_string()
 	return program_str;
 }
 
-std::string TypeDefinitionSection::to_string()
+std::string TypeDefinitionSection::to_string() const
 {
 	std::string type_definition_section_str = "";
 	for (auto type_definition : type_definitions)
@@ -34,7 +34,7 @@ std::string TypeDefinitionSection::to_string()
 	return type_definition_section_str;
 }
 
-std::string TypeDefinition::to_string()
+std::string TypeDefinition::to_string() const
 {
 	std::string type_definition_str = "tipo ";
 	type_definition_str += id->to_string();
@@ -44,7 +44,7 @@ std::string TypeDefinition::to_string()
 	return type_definition_str;
 }
 
-std::string Type::to_string()
+std::string Type::to_string() const
 {
 	std::string type_str = "";
 	switch (type)
@@ -71,7 +71,7 @@ std::string Type::to_string()
 	return type_str;
 }
 
-std::string VariableSection::to_string()
+std::string VariableSection::to_string() const
 {
 	std::string variable_section_str = "";
 	variable_section_str += type->to_string();
@@ -81,7 +81,7 @@ std::string VariableSection::to_string()
 	return variable_section_str;
 }
 
-std::string VariableSectionList::to_string()
+std::string VariableSectionList::to_string() const
 {
 	std::string variable_section_list_str = "";
 	for (auto variable_section : variable_sections)
@@ -91,7 +91,7 @@ std::string VariableSectionList::to_string()
 	return variable_section_list_str;
 }
 
-std::string IdList::to_string()
+std::string IdList::to_string() const
 {
 	std::string id_list_str = "";
 	if (ids.size() > 1)
@@ -115,7 +115,7 @@ std::string IdList::to_string()
 	return id_list_str;
 }
 
-std::string SubprogramDeclList::to_string()
+std::string SubprogramDeclList::to_string() const
 {
 	std::string subprogram_decl_list_str = "";
 	for (auto subprogram_decl : subprogram_decls)
@@ -125,7 +125,7 @@ std::string SubprogramDeclList::to_string()
 	return subprogram_decl_list_str;
 }
 
-std::string SubprogramDecl::to_string()
+std::string SubprogramDecl::to_string() const
 {
 	std::string subprogram_decl_str = "";
 	subprogram_decl_str += header->to_string();
@@ -142,7 +142,7 @@ std::string SubprogramDecl::to_string()
 	return subprogram_decl_str;
 }
 
-std::string SubprogramDeclHeader::to_string()
+std::string SubprogramDeclHeader::to_string() const
 {
 	std::string subprogram_decl_header_str = "";
 	if (type != NULL)
@@ -173,7 +173,7 @@ std::string SubprogramDeclHeader::to_string()
 	return subprogram_decl_header_str;
 }
 
-std::string ArgumentDeclList::to_string()
+std::string ArgumentDeclList::to_string() const
 {
 	std::string argument_decl_list_str = "";
 	if (arguments_decls.size() > 1)
@@ -197,7 +197,7 @@ std::string ArgumentDeclList::to_string()
 	return argument_decl_list_str;
 }
 
-std::string ArgumentDecl::to_string()
+std::string ArgumentDecl::to_string() const
 {
 	std::string argument_decl_str = "";
 	if (var)
@@ -210,7 +210,7 @@ std::string ArgumentDecl::to_string()
 	return argument_decl_str;
 }
 
-std::string StatementList::to_string()
+std::string StatementList::to_string() const
 {
 	std::string statement_list_str = "";
 	for (auto statement : statements)
@@ -221,7 +221,7 @@ std::string StatementList::to_string()
 	return statement_list_str;
 }
 
-std::string AssignStatement::to_string()
+std::string AssignStatement::to_string() const
 {
 	std::string assign_statement_str = "";
 	assign_statement_str += lvalue->to_string();
@@ -230,7 +230,7 @@ std::string AssignStatement::to_string()
 	assign_statement_str += "\n";
 	return assign_statement_str;
 }
-std::string LeftValue::to_string()
+std::string LeftValue::to_string() const
 {
 	std::string left_value_str = "";
 	left_value_str += id->to_string();
@@ -243,7 +243,7 @@ std::string LeftValue::to_string()
 	return left_value_str;
 }
 
-std::string BinaryExpr::to_string()
+std::string BinaryExpr::to_string() const
 {
 	std::string binary_expr_str = "";
 	Expr *expr_expr1 = static_cast<Expr *>(expr1);
@@ -260,18 +260,18 @@ std::string BinaryExpr::to_string()
 		string2 = "( " + string2 + " )";
 	}
 
-	binary_expr_str += string1 + " " + this->get_oper() + " " + string2;
+	binary_expr_str += string1 + " " + get_oper() + " " + string2;
 	return binary_expr_str;
 }
 
-std::string NegativeExpr::to_string()
+std::string NegativeExpr::to_string() const
 {
 	std::string negative_expr_str = "-";
 	negative_expr_str += expr->to_string();
 	return negative_expr_str;
 }
 
-std::string BooleanNode::to_string()
+std::string BooleanNode::to_string() const
 {
 	std::string boolean_node_str = "";
 	if (boolean)
@@ -285,7 +285,7 @@ std::string BooleanNode::to_string()
 	return boolean_node_str;
 }
 
-std::string SubprogramCall::to_string()
+std::string SubprogramCall::to_string() const
 {
 	std::string subprogram_call_str = "";
 	subprogram_call_str += id->to_string();
@@ -298,7 +298,7 @@ std::string SubprogramCall::to_string()
 	return subprogram_call_str;
 }
 
-std::string ArgumentList::to_string()
+std::string ArgumentList::to_string() const
 {
 	std::string argument_list_str = "";
 	if (arguments.size() > 1)
@@ -322,7 +322,7 @@ std::string ArgumentList::to_string()
 	return argument_list_str;
 }
 
-std::string CallStatement::to_string()
+std::string CallStatement::to_string() const
 {
 	std::string call_statement_str = "llamar ";
 	call_statement_str += call->to_string();
@@ -330,7 +330,7 @@ std::string CallStatement::to_string()
 	return call_statement_str;
 }
 
-std::string IfStatement::to_string()
+std::string IfStatement::to_string() const
 {
 	std::string if_statement_str = "si ";
 	if_statement_str += expr->to_string();
@@ -347,7 +347,7 @@ std::string IfStatement::to_string()
 	return if_statement_str;
 }
 
-std::string ElseStatement::to_string()
+std::string ElseStatement::to_string() const
 {
 	std::string else_statement_str = "sino\n";
 	if (statement_list != NULL)
@@ -357,7 +357,7 @@ std::string ElseStatement::to_string()
 	return else_statement_str;
 }
 
-std::string WhileStatement::to_string()
+std::string WhileStatement::to_string() const
 {
 	std::string while_statement_str = "mientras ";
 	while_statement_str += expr->to_string();
@@ -370,7 +370,7 @@ std::string WhileStatement::to_string()
 	return while_statement_str;
 }
 
-std::string ForStatement::to_string()
+std::string ForStatement::to_string() const
 {
 	std::string for_statement_str = "para ";
 	for_statement_str += assign->to_string();
@@ -386,7 +386,7 @@ std::string ForStatement::to_string()
 	return for_statement_str;
 }
 
-std::string NotDoWhileStatement::to_string()
+std::string NotDoWhileStatement::to_string() const
 {
 	std::string not_do_while_statement_str = "repita\n";
 	if (statement_list != NULL)
@@ -399,7 +399,7 @@ std::string NotDoWhileStatement::to_string()
 	return not_do_while_statement_str;
 }
 
-std::string ReturnNode::to_string()
+std::string ReturnNode::to_string() const
 {
 	std::string return_node_str = "retorne ";
 	return_node_str += expr->to_string();
@@ -407,7 +407,7 @@ std::string ReturnNode::to_string()
 	return return_node_str;
 }
 
-std::string WriteNode::to_string()
+std::string WriteNode::to_string() const
 {
 	std::string write_node_str = "escriba ";
 	write_node_str += argument_list->to_string();
@@ -415,7 +415,7 @@ std::string WriteNode::to_string()
 	return write_node_str;
 }
 
-std::string ReadNode::to_string()
+std::string ReadNode::to_string() const
 {
 	std::string read_node_str = "lea ";
 	read_node_str += expr->to_string();
@@ -423,7 +423,7 @@ std::string ReadNode::to_string()
 	return read_node_str;
 }
 
-std::string NegateExpr::to_string()
+std::string NegateExpr::to_string() const
 {
 	std::string negate_expr_str = "no ";
 	negate_expr_str += expr->to_string();

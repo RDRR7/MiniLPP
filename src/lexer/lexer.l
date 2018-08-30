@@ -10,7 +10,7 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 
-#define YY_DECL int Lexer::_get_next_token(yyscan_t yyscanner)
+#define YY_DECL int Lexer::_get_next_token(yyscan_t yyscanner) const
 #define YY_INPUT(buf, result, max_size)          \
 	std::ifstream *_in = yyget_extra(yyscanner); \
 	_in->read(buf, max_size);                    \
@@ -100,20 +100,20 @@
 
 Lexer::Lexer(std::ifstream &in) : in(in)
 {
-	yylex_init_extra(&this->in, &this->scanner);
+	yylex_init_extra(&in, &scanner);
 }
 
 Lexer::~Lexer()
 {
-	yylex_destroy(this->scanner);
+	yylex_destroy(scanner);
 }
 
-std::string Lexer::get_lexeme()
+std::string Lexer::get_lexeme() const
 {
-	return yyget_text(this->scanner);
+	return yyget_text(scanner);
 }
 
-int Lexer::get_line()
+int Lexer::get_line() const
 {
-	return yyget_lineno(this->scanner);
+	return yyget_lineno(scanner);
 }
