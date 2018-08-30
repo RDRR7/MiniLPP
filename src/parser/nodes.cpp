@@ -24,14 +24,14 @@ std::string ProgramNode::to_string() const
 	return program_str;
 }
 
-std::string TypeDefinitionSection::to_string() const
+std::string TypeDefinitionList::to_string() const
 {
-	std::string type_definition_section_str = "";
-	for (auto type_definition : type_definitions)
+	std::string type_definition_list_str = "";
+	for (auto type_definition : get_ast_nodes())
 	{
-		type_definition_section_str += type_definition->to_string();
+		type_definition_list_str += type_definition->to_string();
 	}
-	return type_definition_section_str;
+	return type_definition_list_str;
 }
 
 std::string TypeDefinition::to_string() const
@@ -84,7 +84,7 @@ std::string VariableSection::to_string() const
 std::string VariableSectionList::to_string() const
 {
 	std::string variable_section_list_str = "";
-	for (auto variable_section : variable_sections)
+	for (auto variable_section : get_ast_nodes())
 	{
 		variable_section_list_str += variable_section->to_string();
 	}
@@ -94,11 +94,11 @@ std::string VariableSectionList::to_string() const
 std::string IdList::to_string() const
 {
 	std::string id_list_str = "";
-	if (ids.size() > 1)
+	if (get_ast_nodes().size() > 1)
 	{
-		for (auto id : ids)
+		for (auto id : get_ast_nodes())
 		{
-			if (id != ids.back())
+			if (id != get_ast_nodes().back())
 			{
 				id_list_str += id->to_string() + ", ";
 			}
@@ -108,9 +108,9 @@ std::string IdList::to_string() const
 			}
 		}
 	}
-	else if (!ids.empty())
+	else if (!get_ast_nodes().empty())
 	{
-		id_list_str = ids.front()->to_string();
+		id_list_str = get_ast_nodes().front()->to_string();
 	}
 	return id_list_str;
 }
@@ -118,7 +118,7 @@ std::string IdList::to_string() const
 std::string SubprogramDeclList::to_string() const
 {
 	std::string subprogram_decl_list_str = "";
-	for (auto subprogram_decl : subprogram_decls)
+	for (auto subprogram_decl : get_ast_nodes())
 	{
 		subprogram_decl_list_str += subprogram_decl->to_string();
 	}
@@ -176,11 +176,11 @@ std::string SubprogramDeclHeader::to_string() const
 std::string ArgumentDeclList::to_string() const
 {
 	std::string argument_decl_list_str = "";
-	if (arguments_decls.size() > 1)
+	if (get_ast_nodes().size() > 1)
 	{
-		for (auto argument_decl : arguments_decls)
+		for (auto argument_decl : get_ast_nodes())
 		{
-			if (argument_decl != arguments_decls.back())
+			if (argument_decl != get_ast_nodes().back())
 			{
 				argument_decl_list_str += argument_decl->to_string() + ", ";
 			}
@@ -190,9 +190,9 @@ std::string ArgumentDeclList::to_string() const
 			}
 		}
 	}
-	else if (!arguments_decls.empty())
+	else if (!get_ast_nodes().empty())
 	{
-		argument_decl_list_str = arguments_decls.front()->to_string();
+		argument_decl_list_str = get_ast_nodes().front()->to_string();
 	}
 	return argument_decl_list_str;
 }
@@ -213,10 +213,9 @@ std::string ArgumentDecl::to_string() const
 std::string StatementList::to_string() const
 {
 	std::string statement_list_str = "";
-	for (auto statement : statements)
+	for (auto statement : get_ast_nodes())
 	{
-		if (statement != NULL) // remove
-			statement_list_str += statement->to_string();
+		statement_list_str += statement->to_string();
 	}
 	return statement_list_str;
 }
@@ -301,11 +300,11 @@ std::string SubprogramCall::to_string() const
 std::string ArgumentList::to_string() const
 {
 	std::string argument_list_str = "";
-	if (arguments.size() > 1)
+	if (get_ast_nodes().size() > 1)
 	{
-		for (auto argument : arguments)
+		for (auto argument : get_ast_nodes())
 		{
-			if (argument != arguments.back())
+			if (argument != get_ast_nodes().back())
 			{
 				argument_list_str += argument->to_string() + ", ";
 			}
@@ -315,9 +314,9 @@ std::string ArgumentList::to_string() const
 			}
 		}
 	}
-	else if (!arguments.empty())
+	else if (!get_ast_nodes().empty())
 	{
-		argument_list_str = arguments.front()->to_string();
+		argument_list_str = get_ast_nodes().front()->to_string();
 	}
 	return argument_list_str;
 }

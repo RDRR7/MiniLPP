@@ -65,23 +65,34 @@ class ProgramNode : public ASTNode
 	ASTNode *statement_list;
 };
 
-class TypeDefinitionSection : public ASTNode
+class ASTNodeList : public ASTNode
 {
   public:
-	TypeDefinitionSection(std::list<ASTNode *> type_definitions)
-		: type_definitions(type_definitions) {}
-	~TypeDefinitionSection() override
+	ASTNodeList(std::list<ASTNode *> ast_nodes)
+		: ast_nodes(ast_nodes) {}
+	~ASTNodeList() override
 	{
-		while (!type_definitions.empty())
+		while (!ast_nodes.empty())
 		{
-			delete type_definitions.front();
-			type_definitions.pop_front();
+			delete ast_nodes.front();
+			ast_nodes.pop_front();
 		}
 	}
-	std::string to_string() const override;
+	std::list<ASTNode *> get_ast_nodes() const
+	{
+		return ast_nodes;
+	}
 
   private:
-	std::list<ASTNode *> type_definitions;
+	std::list<ASTNode *> ast_nodes;
+};
+
+class TypeDefinitionList : public ASTNodeList
+{
+  public:
+	TypeDefinitionList(std::list<ASTNode *> type_definitions)
+		: ASTNodeList(type_definitions) {}
+	std::string to_string() const override;
 };
 
 class TypeDefinition : public ASTNode
@@ -172,23 +183,12 @@ class NumberNode : public Expr
 	int number;
 };
 
-class VariableSectionList : public ASTNode
+class VariableSectionList : public ASTNodeList
 {
   public:
 	VariableSectionList(std::list<ASTNode *> variable_sections)
-		: variable_sections(variable_sections) {}
-	~VariableSectionList() override
-	{
-		while (!variable_sections.empty())
-		{
-			delete variable_sections.front();
-			variable_sections.pop_front();
-		}
-	}
+		: ASTNodeList(variable_sections) {}
 	std::string to_string() const;
-
-  private:
-	std::list<ASTNode *> variable_sections;
 };
 
 class VariableSection : public ASTNode
@@ -210,42 +210,20 @@ class VariableSection : public ASTNode
 	ASTNode *type;
 };
 
-class IdList : public ASTNode
+class IdList : public ASTNodeList
 {
   public:
 	IdList(std::list<ASTNode *> ids)
-		: ids(ids) {}
-	~IdList() override
-	{
-		while (!ids.empty())
-		{
-			delete ids.front();
-			ids.pop_front();
-		}
-	}
+		: ASTNodeList(ids) {}
 	std::string to_string() const override;
-
-  private:
-	std::list<ASTNode *> ids;
 };
 
-class SubprogramDeclList : public ASTNode
+class SubprogramDeclList : public ASTNodeList
 {
   public:
 	SubprogramDeclList(std::list<ASTNode *> subprogram_decls)
-		: subprogram_decls(subprogram_decls) {}
-	~SubprogramDeclList()
-	{
-		while (!subprogram_decls.empty())
-		{
-			delete subprogram_decls.front();
-			subprogram_decls.pop_front();
-		}
-	}
+		: ASTNodeList(subprogram_decls) {}
 	std::string to_string() const override;
-
-  private:
-	std::list<ASTNode *> subprogram_decls;
 };
 
 class SubprogramDecl : public ASTNode
@@ -294,23 +272,12 @@ class SubprogramDeclHeader : public ASTNode
 	ASTNode *type;
 };
 
-class ArgumentDeclList : public ASTNode
+class ArgumentDeclList : public ASTNodeList
 {
   public:
 	ArgumentDeclList(std::list<ASTNode *> arguments_decls)
-		: arguments_decls(arguments_decls) {}
-	~ArgumentDeclList() override
-	{
-		while (!arguments_decls.empty())
-		{
-			delete arguments_decls.front();
-			arguments_decls.pop_front();
-		}
-	}
+		: ASTNodeList(arguments_decls) {}
 	std::string to_string() const override;
-
-  private:
-	std::list<ASTNode *> arguments_decls;
 };
 
 class ArgumentDecl : public ASTNode
@@ -335,23 +302,12 @@ class ArgumentDecl : public ASTNode
 	bool var;
 };
 
-class StatementList : public ASTNode
+class StatementList : public ASTNodeList
 {
   public:
 	StatementList(std::list<ASTNode *> statements)
-		: statements(statements) {}
-	~StatementList() override
-	{
-		while (!statements.empty())
-		{
-			delete statements.front();
-			statements.pop_front();
-		}
-	}
+		: ASTNodeList(statements) {}
 	std::string to_string() const override;
-
-  private:
-	std::list<ASTNode *> statements;
 };
 
 class AssignStatement : public ASTNode
@@ -501,23 +457,12 @@ class SubprogramCall : public Expr
 	ASTNode *argument_list;
 };
 
-class ArgumentList : public ASTNode
+class ArgumentList : public ASTNodeList
 {
   public:
 	ArgumentList(std::list<ASTNode *> arguments)
-		: arguments(arguments) {}
-	~ArgumentList() override
-	{
-		while (!arguments.empty())
-		{
-			delete arguments.front();
-			arguments.pop_front();
-		}
-	}
+		: ASTNodeList(arguments) {}
 	std::string to_string() const override;
-
-  private:
-	std::list<ASTNode *> arguments;
 };
 
 class CallStatement : public ASTNode

@@ -93,7 +93,7 @@ type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	{
 																						std::list<ASTNode *> type_definitions;
 																						type_definitions.push_back($1);
 																						type_definitions.push_back(new TypeDefinition($4, $6));
-																						$$ = new TypeDefinitionSection(type_definitions);
+																						$$ = new TypeDefinitionList(type_definitions);
 																					}
 							|	"tipo" TK_ID "es" type								{ $$ = new TypeDefinition($2, $4); }
 ;
