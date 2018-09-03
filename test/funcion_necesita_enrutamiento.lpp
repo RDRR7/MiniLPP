@@ -5,8 +5,9 @@
     * Arzu
     * Morales
 */
- /*
-    *  Debe ingresar:
+
+/*
+    *  Debe ingresar: 
     -> Dos direcciones IPv4 (la de origen con la mascara de subred)
     *  Ejemplo:
         Arreglo [5] de Entero origen
@@ -25,11 +26,13 @@
             _necesitaEntrutamiento <- necesitaEntrutamiento(origen, destino)
         Fin
 */
- Arreglo [5] de Entero origen
+
+Arreglo [5] de Entero origen
 Arreglo [4] de Entero destino
 Booleano _necesitaEnrutamiento
 Entero i
- Funcion necesitaEnrutamiento (Arreglo [5] de Entero origen, Arreglo [4] de Entero destino) : Booleano
+
+Funcion necesitaEnrutamiento (Arreglo [5] de Entero origen, Arreglo [4] de Entero destino) : Booleano
 Arreglo[4] de Entero mascara
 Arreglo[5] de Entero idRed
 Arreglo[4] de Entero broadcast
@@ -75,14 +78,16 @@ Inicio
 	Fin Para
     Retorne Falso
 Fin
- Funcion valorAbsoluto(Entero n) : Entero
+
+Funcion valorAbsoluto(Entero n) : Entero
 Inicio
     Si n < 1 Entonces
         Retorne n*-1
     Fin Si
     Retorne n
 Fin
- Inicio
+
+Inicio
     origen[1] <- 192
     origen[2] <- 168
     origen[3] <- 4

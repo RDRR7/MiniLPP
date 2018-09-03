@@ -1,4 +1,5 @@
 #include "nodes.hpp"
+#include <cassert>
 
 std::string ProgramNode::to_string() const
 {
@@ -427,4 +428,11 @@ std::string NegateExpr::to_string() const
 	std::string negate_expr_str = "no ";
 	negate_expr_str += expr->to_string();
 	return negate_expr_str;
+}
+
+void ASTNodeList::add_to_list(ASTNode *list, ASTNode *element)
+{
+	assert(list->get_type() == NodeEnum::List);
+	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(list);
+	ast_node_list->get_pointer_to_ast_nodes()->push_back(element);
 }

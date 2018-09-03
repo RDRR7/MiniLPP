@@ -10,6 +10,7 @@ using YYSTYPE = ASTNode *;
 }
 
 %{
+
 #include "parser.hpp"
 
 extern std::ifstream in;
@@ -90,12 +91,13 @@ type-definition-section.opt	:	%empty												{ $$ = NULL; }
 							|	type-definition-section eols						{ $$ = $1; }
 ;
 type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	{
-																						std::list<ASTNode *> type_definitions;
-																						type_definitions.push_back($1);
-																						type_definitions.push_back(new TypeDefinition($4, $6));
-																						$$ = new TypeDefinitionList(type_definitions);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, new TypeDefinition($4, $6));
 																					}
-							|	"tipo" TK_ID "es" type								{ $$ = new TypeDefinition($2, $4); }
+							|	"tipo" TK_ID "es" type								{
+																						$$ = new TypeDefinitionList();
+																						ASTNodeList::add_to_list($$, new TypeDefinition($2, $4));
+																					}
 ;
 type						:	"entero"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
 							|	"booleano"											{ $$ = new Type(TypeEnum::Booleano, NULL, NULL, NULL); }
@@ -109,31 +111,34 @@ variable-section.opt		:	%empty												{ $$ = NULL; }
 							|	variable-section eols								{ $$ = $1; }
 ;
 variable-section			:	variable-section eols type id-list					{
-																						std::list<ASTNode *> variable_sections;
-																						variable_sections.push_back($1);
-																						variable_sections.push_back(new VariableSection($4, $3));
-																						$$ = new VariableSectionList(variable_sections);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, new VariableSection($4, $3));
 																					}
-							|	type id-list										{ $$ = new VariableSection($2, $1); }
+							|	type id-list										{
+																						$$ = new VariableSectionList();
+																						ASTNodeList::add_to_list($$, new VariableSection($2, $1));
+																					}
 ;
 id-list						:	id-list	',' TK_ID									{
-																						std::list<ASTNode *> ids;
-																						ids.push_back($1);
-																						ids.push_back($3);
-																						$$ = new IdList(ids);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 																					}
-							|	TK_ID												{ $$ = $1; }
+							|	TK_ID												{
+																						$$ = new IdList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
 ;
 subprogram-decl.opt			:	%empty												{ $$ = NULL; }
 							|	subprogram-decl-list eols							{ $$ = $1; }
 ;
 subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl			{
-																						std::list<ASTNode *> subprogram_decls;
-																						subprogram_decls.push_back($1);
-																						subprogram_decls.push_back($3);
-																						$$ = new SubprogramDeclList(subprogram_decls);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 																					}
-							|	subprogram-decl										{ $$ = $1; }
+							|	subprogram-decl										{
+																						$$ = new SubprogramDeclList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
 ;
 subprogram-decl				:	subprogram-header
 								eols
@@ -152,19 +157,21 @@ arguments.opt				:	%empty												{ $$ = NULL; }
 							|	'(' argument-decl-list ')'							{ $$ = $2; }
 ;
 argument-decl-list			:	argument-decl-list ',' type TK_ID					{
-																						std::list<ASTNode *> arguments_decls;
-																						arguments_decls.push_back($1);
-																						arguments_decls.push_back(new ArgumentDecl($3, $4, false));
-																						$$ = new ArgumentDeclList(arguments_decls);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, new ArgumentDecl($3, $4, false));
 																					}
 							|	argument-decl-list ',' "var" type TK_ID				{
-																						std::list<ASTNode *> arguments_decls;
-																						arguments_decls.push_back($1);
-																						arguments_decls.push_back(new ArgumentDecl($4, $4, true));
-																						$$ = new ArgumentDeclList(arguments_decls);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, new ArgumentDecl($4, $5, true));
 							 														}
-							|	type TK_ID											{ $$ = new ArgumentDecl($1, $2, false); }
-							|	"var" type TK_ID									{ $$ = new ArgumentDecl($2, $3, true); }
+							|	type TK_ID											{
+																						$$ = new ArgumentDeclList();
+																						ASTNodeList::add_to_list($$, new ArgumentDecl($1, $2, false));
+																					}
+							|	"var" type TK_ID									{
+																						$$ = new ArgumentDeclList();
+																						ASTNodeList::add_to_list($$, new ArgumentDecl($2, $3, true));
+																					}
 ;
 procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = new SubprogramDeclHeader($2, $3, NULL); }
 ;
@@ -172,12 +179,13 @@ statement-list.opt			:	%empty												{ $$ = NULL; }
 							|	statement-list eols 								{ $$ = $1; }
 ;
 statement-list				:	statement-list eols statement						{
-																						std::list<ASTNode *> statements;
-																						statements.push_back($1);
-																						statements.push_back($3);
-																						$$ = new StatementList(statements);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 																					}
-							|	statement											{ $$ = $1; }
+							|	statement											{
+																						$$ = new StatementList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
 ;
 statement					:	assign												{ $$ = $1; }
 							|	"llamar" subprogram-call							{ $$ = new CallStatement($2); }
@@ -204,19 +212,21 @@ statement					:	assign												{ $$ = $1; }
 							|	"lea" lvalue										{ $$ = new ReadNode($2); }
 ;
 argument-list-with-string	:	argument-list-with-string ',' expr					{
-																						std::list<ASTNode *> arguments;
-																						arguments.push_back($1);
-																						arguments.push_back($3);
-																						$$ = new ArgumentList(arguments);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 																					}
 							|	argument-list-with-string ',' TK_STRING_LITERAL		{
-																						std::list<ASTNode *> arguments;
-																						arguments.push_back($1);
-																						arguments.push_back($3);
-																						$$ = new ArgumentList(arguments);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 							 														}
-							|	expr												{ $$ = $1; }
-							|	TK_STRING_LITERAL									{ $$ = $1; }
+							|	expr												{
+																						$$ = new ArgumentList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
+							|	TK_STRING_LITERAL									{
+																						$$ = new ArgumentList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
 ;
 else.opt					:	%empty												{ $$ = NULL; }
 							|	"sino"
@@ -268,12 +278,13 @@ argument-list.opt			:	%empty												{ $$ = NULL; }
 							|	argument-list										{ $$ = $1; }
 ;
 argument-list				:	argument-list ',' expr								{
-																						std::list<ASTNode *> arguments;
-																						arguments.push_back($1);
-																						arguments.push_back($3);
-																						$$ = new ArgumentList(arguments);
+																						$$ = $1;
+																						ASTNodeList::add_to_list($$, $3);
 																					}
-							|	expr												{ $$ = $1; }
+							|	expr												{
+																						$$ = new ArgumentList();
+																						ASTNodeList::add_to_list($$, $1);
+																					}
 ;
 
 %%

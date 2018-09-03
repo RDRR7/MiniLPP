@@ -1,0 +1,11 @@
+procedimiento Test1(Entero x)
+inicio
+    Escriba x
+    Llamar Nueva_Linea
+fin
+
+inicio
+    Llamar Limpiar_Pantalla
+    Llamar Test1(100)
+    Llamar Test1(200)
+fin

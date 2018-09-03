@@ -1,0 +1,25 @@
+Tipo entero_t Es Entero
+Tipo cadena_t Es Arreglo [10] de Caracter
+entero_t cantidad
+entero_t indice
+cadena_t nombre
+
+Procedimiento leerNombre (Var cadena_t nombre, entero_t cantidad)
+Inicio
+	Para indice <- 1 Hasta cantidad Haga
+		Lea nombre[indice]
+	Fin Para
+Fin
+
+Inicio
+	Escriba "Indique la longitud de su nombre por favor. Maximo 10"
+	Llamar Nueva_linea
+	Lea cantidad
+	EScriba "Escriba su nombre caracter tras caracter. Despues de cada caracter, presiona la tecla Intro"
+	Llamar Nueva_linea
+	Llamar leerNombre(nombre, cantidad)
+	Escriba "Se leyeron ", cantidad, " caracteres: "
+	Para indice <- 1 Hasta cantidad Haga
+		Escriba nombre[indice]
+	Fin Para
+Fin

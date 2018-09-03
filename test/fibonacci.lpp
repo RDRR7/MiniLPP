@@ -1,0 +1,20 @@
+entero n
+
+funcion fibonacci(entero n):entero
+inicio
+    si (n=0) o (n=1) entonces
+        retorne 1
+    sino
+        retorne fibonacci(n-1) + fibonacci(n-2)
+    fin si
+fin
+
+inicio
+    llamar limpiar_pantalla
+    Escriba "Escriba un entero : "
+    lea n
+    llamar nueva_linea
+    
+    Escriba "Fibonacci ", n, " es ", fibonacci(n)
+    llamar obtener_tecla
+fin

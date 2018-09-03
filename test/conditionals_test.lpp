@@ -1,0 +1,45 @@
+Entero entrada
+
+Inicio
+	Escriba "En este programa, tiene que acatar ordenes. Sino, atengase a las consecuencias"
+	Llamar Nueva_linea
+	Escriba "Ingrese el numero 10"
+	Llamar Nueva_linea
+	Lea entrada
+	Si entrada <> 10 
+	Entonces
+		Escriba "No sea neci@"
+	Sino
+		Escriba "Muy bien!"
+		Llamar Nueva_linea
+		Escriba "Ingrese un numero que solo tenga un digito"
+		Llamar Nueva_linea
+		Lea entrada
+		Si ((entrada = 1) o (entrada = 2) o (entrada = 3) o (entrada = 5) o (entrada = 6) o (entrada = 7) o (entrada = 8) o (entrada = 9) o (entrada = 0))
+		Entonces
+			Escriba "Excelente, siga asi!"
+			Llamar Nueva_linea
+			Escriba "Ingrese un numero entre 0 y 20"
+			Llamar Nueva_linea
+			Lea entrada
+			Si (entrada > 0) y (entrada < 20)
+			Entonces
+				Escriba "Me sorprende su nivel"
+				Llamar Nueva_linea
+				Escriba "Ingrese el resultado de la raiz cuadrada de 4"
+				Llamar Nueva_linea
+				Lea entrada
+				Si (entrada = 2) o (entrada = -2)
+				Entonces
+					Escriba "Grandioso!"
+				Sino
+					Escriba "Adios, que barbaridad"
+				Fin Si
+			Sino
+				Escriba "Que debil, pensamos que era excelente"
+			Fin Si
+		Sino
+			Escriba "Iba bien, pero ya no... vayase!"
+		Fin Si
+	Fin Si
+Fin

@@ -27,7 +27,13 @@ enum class TypeEnum : unsigned int
 	Booleano = 2,
 	Caracter = 3,
 	Arreglo = 4,
-	Tipo = 5
+	Tipo = 5,
+};
+
+enum class NodeEnum : unsigned int
+{
+	List = 1,
+	Other = 255,
 };
 
 class ASTNode
@@ -36,6 +42,10 @@ class ASTNode
 	ASTNode() {}
 	virtual ~ASTNode() {}
 	virtual std::string to_string() const = 0;
+	virtual NodeEnum get_type() const
+	{
+		return NodeEnum::Other;
+	}
 };
 
 class ProgramNode : public ASTNode
@@ -68,8 +78,7 @@ class ProgramNode : public ASTNode
 class ASTNodeList : public ASTNode
 {
   public:
-	ASTNodeList(std::list<ASTNode *> ast_nodes)
-		: ast_nodes(ast_nodes) {}
+	ASTNodeList() {}
 	~ASTNodeList() override
 	{
 		while (!ast_nodes.empty())
@@ -82,6 +91,15 @@ class ASTNodeList : public ASTNode
 	{
 		return ast_nodes;
 	}
+	std::list<ASTNode *> *get_pointer_to_ast_nodes()
+	{
+		return &ast_nodes;
+	}
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::List;
+	}
+	static void add_to_list(ASTNode *list, ASTNode *element);
 
   private:
 	std::list<ASTNode *> ast_nodes;
@@ -90,8 +108,7 @@ class ASTNodeList : public ASTNode
 class TypeDefinitionList : public ASTNodeList
 {
   public:
-	TypeDefinitionList(std::list<ASTNode *> type_definitions)
-		: ASTNodeList(type_definitions) {}
+	TypeDefinitionList() {}
 	std::string to_string() const override;
 };
 
@@ -186,8 +203,7 @@ class NumberNode : public Expr
 class VariableSectionList : public ASTNodeList
 {
   public:
-	VariableSectionList(std::list<ASTNode *> variable_sections)
-		: ASTNodeList(variable_sections) {}
+	VariableSectionList() {}
 	std::string to_string() const;
 };
 
@@ -213,16 +229,14 @@ class VariableSection : public ASTNode
 class IdList : public ASTNodeList
 {
   public:
-	IdList(std::list<ASTNode *> ids)
-		: ASTNodeList(ids) {}
+	IdList() {}
 	std::string to_string() const override;
 };
 
 class SubprogramDeclList : public ASTNodeList
 {
   public:
-	SubprogramDeclList(std::list<ASTNode *> subprogram_decls)
-		: ASTNodeList(subprogram_decls) {}
+	SubprogramDeclList() {}
 	std::string to_string() const override;
 };
 
@@ -275,8 +289,7 @@ class SubprogramDeclHeader : public ASTNode
 class ArgumentDeclList : public ASTNodeList
 {
   public:
-	ArgumentDeclList(std::list<ASTNode *> arguments_decls)
-		: ASTNodeList(arguments_decls) {}
+	ArgumentDeclList() {}
 	std::string to_string() const override;
 };
 
@@ -305,8 +318,7 @@ class ArgumentDecl : public ASTNode
 class StatementList : public ASTNodeList
 {
   public:
-	StatementList(std::list<ASTNode *> statements)
-		: ASTNodeList(statements) {}
+	StatementList() {}
 	std::string to_string() const override;
 };
 
@@ -460,8 +472,7 @@ class SubprogramCall : public Expr
 class ArgumentList : public ASTNodeList
 {
   public:
-	ArgumentList(std::list<ASTNode *> arguments)
-		: ASTNodeList(arguments) {}
+	ArgumentList() {}
 	std::string to_string() const override;
 };
 
