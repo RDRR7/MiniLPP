@@ -1,0 +1,15 @@
+Entero x
+
+funcion Test(Entero x): Entero
+inicio
+    retorne x + 100
+fin
+
+inicio
+    Llamar Limpiar_Pantalla
+    x <- 100
+    Escriba Test(x)
+    Llamar Nueva_Linea
+    Escriba Test(200)
+    Llamar Nueva_Linea
+fin

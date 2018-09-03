@@ -1,0 +1,14 @@
+Entero x
+
+procedimiento Test(var Entero x)
+inicio
+    x <- x + 100
+fin
+
+inicio
+    Llamar Limpiar_Pantalla
+    x <- 100
+    Llamar Test(x)
+    Escriba x
+    Llamar Nueva_Linea
+fin

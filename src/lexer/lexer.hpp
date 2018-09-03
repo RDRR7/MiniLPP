@@ -34,16 +34,18 @@ class Lexer
   public:
 	Lexer(std::ifstream &in);
 	~Lexer();
-
-	int get_next_token() { return _get_next_token(scanner); }
-	std::string get_lexeme();
-	int get_line();
+	int get_next_token() const
+	{
+		return _get_next_token(scanner);
+	}
+	std::string get_lexeme() const;
+	int get_line() const;
 
   private:
 	std::ifstream &in;
 	yyscan_t scanner;
 
-	int _get_next_token(yyscan_t yyscanner);
+	int _get_next_token(yyscan_t yyscanner) const;
 };
 
 #endif

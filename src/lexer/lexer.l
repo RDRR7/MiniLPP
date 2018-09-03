@@ -10,7 +10,7 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 
-#define YY_DECL int Lexer::_get_next_token(yyscan_t yyscanner)
+#define YY_DECL int Lexer::_get_next_token(yyscan_t yyscanner) const
 #define YY_INPUT(buf, result, max_size)          \
 	std::ifstream *_in = yyget_extra(yyscanner); \
 	_in->read(buf, max_size);                    \
@@ -85,14 +85,14 @@
 "<>"							return static_cast<int>(yytokentype::TK_NEQU);
 
 [ \t] 							;
-\n								return static_cast<int>(Token::TK_EOL);
+\r?\n							return static_cast<int>(Token::TK_EOL);
 <INITIAL,LINE_COMMENT><<EOF>>	yyterminate();
 .								return static_cast<int>(Token::TK_UNKNOWN);
 
 <LINE_COMMENT>.					;
-<LINE_COMMENT>\n 				BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
+<LINE_COMMENT>\r?\n 			BEGIN(INITIAL); return static_cast<int>(Token::TK_EOL);
 
-<BLOCK_COMMENT>(.|\n)			;
+<BLOCK_COMMENT>(.|\r?\n)		;
 <BLOCK_COMMENT><<EOF>>			YY_FATAL_ERROR("Unclosed block comment");
 <BLOCK_COMMENT>"*/"				BEGIN(INITIAL);
 
@@ -100,20 +100,20 @@
 
 Lexer::Lexer(std::ifstream &in) : in(in)
 {
-	yylex_init_extra(&this->in, &this->scanner);
+	yylex_init_extra(&in, &scanner);
 }
 
 Lexer::~Lexer()
 {
-	yylex_destroy(this->scanner);
+	yylex_destroy(scanner);
 }
 
-std::string Lexer::get_lexeme()
+std::string Lexer::get_lexeme() const
 {
-	return yyget_text(this->scanner);
+	return yyget_text(scanner);
 }
 
-int Lexer::get_line()
+int Lexer::get_line() const
 {
-	return yyget_lineno(this->scanner);
+	return yyget_lineno(scanner);
 }
