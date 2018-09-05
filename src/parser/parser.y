@@ -16,7 +16,8 @@ using YYSTYPE = ASTNode *;
 extern std::ifstream in;
 Lexer lexer(in);
 
-void yyerror(ASTNode **program_node, const char *msg);
+void yyerror(ASTNode **program_node,
+			 const char *msg);
 int yylex();
 
 %}
@@ -79,7 +80,7 @@ program						:	eols.opt
 								eols.opt
 								statement-list.opt
 								"fin"
-								eols.opt											{ $$ = new ProgramNode($2, $3, $4, $7); }
+								eols.opt											{ $$ = new ProgramNode(lexer.get_line(), $2, $3, $4, $7); }
 ;
 eols.opt 					: 	%empty												{ $$ = NULL; }
 							| 	eols
@@ -92,31 +93,31 @@ type-definition-section.opt	:	%empty												{ $$ = NULL; }
 ;
 type-definition-section		:	type-definition-section eols "tipo" TK_ID "es" type	{
 																						$$ = $1;
-																						ASTNodeList::add_to_list($$, new TypeDefinition($4, $6));
+																						ASTNodeList::add_to_list($$, new TypeDefinition(lexer.get_line(), $4, $6));
 																					}
 							|	"tipo" TK_ID "es" type								{
-																						$$ = new TypeDefinitionList();
-																						ASTNodeList::add_to_list($$, new TypeDefinition($2, $4));
+																						$$ = new TypeDefinitionList(lexer.get_line());
+																						ASTNodeList::add_to_list($$, new TypeDefinition(lexer.get_line(), $2, $4));
 																					}
 ;
-type						:	"entero"											{ $$ = new Type(TypeEnum::Entero, NULL, NULL, NULL); }
-							|	"booleano"											{ $$ = new Type(TypeEnum::Booleano, NULL, NULL, NULL); }
-							|	"caracter"											{ $$ = new Type(TypeEnum::Caracter, NULL, NULL, NULL); }
-							|	TK_ID												{ $$ = new Type(TypeEnum::Tipo, NULL, $1, NULL); }
+type						:	"entero"											{ $$ = new Type(lexer.get_line(), TypeEnum::Entero, NULL, NULL, NULL); }
+							|	"booleano"											{ $$ = new Type(lexer.get_line(), TypeEnum::Booleano, NULL, NULL, NULL); }
+							|	"caracter"											{ $$ = new Type(lexer.get_line(), TypeEnum::Caracter, NULL, NULL, NULL); }
+							|	TK_ID												{ $$ = new Type(lexer.get_line(), TypeEnum::Tipo, NULL, $1, NULL); }
 							|	array-type											{ $$ = $1; }
 ;
-array-type					:	"arreglo" '[' TK_NUMBER ']' "de" type				{ $$ = new Type(TypeEnum::Arreglo, $3, NULL, $6); }
+array-type					:	"arreglo" '[' TK_NUMBER ']' "de" type				{ $$ = new Type(lexer.get_line(), TypeEnum::Arreglo, $3, NULL, $6); }
 ;
 variable-section.opt		:	%empty												{ $$ = NULL; }
 							|	variable-section eols								{ $$ = $1; }
 ;
 variable-section			:	variable-section eols type id-list					{
 																						$$ = $1;
-																						ASTNodeList::add_to_list($$, new VariableSection($4, $3));
+																						ASTNodeList::add_to_list($$, new VariableSection(lexer.get_line(), $4, $3));
 																					}
 							|	type id-list										{
-																						$$ = new VariableSectionList();
-																						ASTNodeList::add_to_list($$, new VariableSection($2, $1));
+																						$$ = new VariableSectionList(lexer.get_line());
+																						ASTNodeList::add_to_list($$, new VariableSection(lexer.get_line(), $2, $1));
 																					}
 ;
 id-list						:	id-list	',' TK_ID									{
@@ -124,7 +125,7 @@ id-list						:	id-list	',' TK_ID									{
 																						ASTNodeList::add_to_list($$, $3);
 																					}
 							|	TK_ID												{
-																						$$ = new IdList();
+																						$$ = new IdList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 ;
@@ -136,7 +137,7 @@ subprogram-decl-list		:	subprogram-decl-list eols subprogram-decl			{
 																						ASTNodeList::add_to_list($$, $3);
 																					}
 							|	subprogram-decl										{
-																						$$ = new SubprogramDeclList();
+																						$$ = new SubprogramDeclList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 ;
@@ -146,34 +147,34 @@ subprogram-decl				:	subprogram-header
 								"inicio"
 								eols.opt
 								statement-list.opt
-								"fin"												{ $$ = new SubprogramDecl($1, $3, $6); }
+								"fin"												{ $$ = new SubprogramDecl(lexer.get_line(), $1, $3, $6); }
 ;
 subprogram-header			:	function-header										{ $$ = $1; }
 							|	procedure-header									{ $$ = $1; }
 ;
-function-header				:	"funcion" TK_ID arguments.opt ':' type				{ $$ = new SubprogramDeclHeader($2, $3, $5); }
+function-header				:	"funcion" TK_ID arguments.opt ':' type				{ $$ = new SubprogramDeclHeader(lexer.get_line(), $2, $3, $5); }
 ;
 arguments.opt				:	%empty												{ $$ = NULL; }
 							|	'(' argument-decl-list ')'							{ $$ = $2; }
 ;
 argument-decl-list			:	argument-decl-list ',' type TK_ID					{
 																						$$ = $1;
-																						ASTNodeList::add_to_list($$, new ArgumentDecl($3, $4, false));
+																						ASTNodeList::add_to_list($$, new ArgumentDecl(lexer.get_line(), $3, $4, false));
 																					}
 							|	argument-decl-list ',' "var" type TK_ID				{
 																						$$ = $1;
-																						ASTNodeList::add_to_list($$, new ArgumentDecl($4, $5, true));
+																						ASTNodeList::add_to_list($$, new ArgumentDecl(lexer.get_line(), $4, $5, true));
 							 														}
 							|	type TK_ID											{
-																						$$ = new ArgumentDeclList();
-																						ASTNodeList::add_to_list($$, new ArgumentDecl($1, $2, false));
+																						$$ = new ArgumentDeclList(lexer.get_line());
+																						ASTNodeList::add_to_list($$, new ArgumentDecl(lexer.get_line(), $1, $2, false));
 																					}
 							|	"var" type TK_ID									{
-																						$$ = new ArgumentDeclList();
-																						ASTNodeList::add_to_list($$, new ArgumentDecl($2, $3, true));
+																						$$ = new ArgumentDeclList(lexer.get_line());
+																						ASTNodeList::add_to_list($$, new ArgumentDecl(lexer.get_line(), $2, $3, true));
 																					}
 ;
-procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = new SubprogramDeclHeader($2, $3, NULL); }
+procedure-header			:	"procedimiento" TK_ID arguments.opt 				{ $$ = new SubprogramDeclHeader(lexer.get_line(), $2, $3, NULL); }
 ;
 statement-list.opt			:	%empty												{ $$ = NULL; }
 							|	statement-list eols 								{ $$ = $1; }
@@ -183,33 +184,33 @@ statement-list				:	statement-list eols statement						{
 																						ASTNodeList::add_to_list($$, $3);
 																					}
 							|	statement											{
-																						$$ = new StatementList();
+																						$$ = new StatementList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 ;
 statement					:	assign												{ $$ = $1; }
-							|	"llamar" subprogram-call							{ $$ = new CallStatement($2); }
-							|	"llamar" TK_ID										{ $$ = new CallStatement($2); }
+							|	"llamar" subprogram-call							{ $$ = new CallStatement(lexer.get_line(), $2); }
+							|	"llamar" TK_ID										{ $$ = new CallStatement(lexer.get_line(), $2); }
 							|	"si" expr eols.opt "entonces"
 								eols.opt
 								statement-list.opt
 								else.opt
-								"fin" "si"											{ $$ = new IfStatement($2, $6, $7); }
+								"fin" "si"											{ $$ = new IfStatement(lexer.get_line(), $2, $6, $7); }
 							|	"mientras" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "mientras"									{ $$ = new WhileStatement($2, $5); }
+								"fin" "mientras"									{ $$ = new WhileStatement(lexer.get_line(), $2, $5); }
 							|	"para" assign "hasta" expr "haga"
 								eols.opt
 								statement-list.opt
-								"fin" "para"										{ $$ = new ForStatement($2, $4, $7); }
+								"fin" "para"										{ $$ = new ForStatement(lexer.get_line(), $2, $4, $7); }
 							|	"repita"
 								eols.opt
 								statement-list.opt
-								"hasta" expr										{ $$ = new NotDoWhileStatement($5, $3); }
-							|	"retorne" expr										{ $$ = new ReturnNode($2); }
-							|	"escriba" argument-list-with-string					{ $$ = new WriteNode($2); }
-							|	"lea" lvalue										{ $$ = new ReadNode($2); }
+								"hasta" expr										{ $$ = new NotDoWhileStatement(lexer.get_line(), $5, $3); }
+							|	"retorne" expr										{ $$ = new ReturnNode(lexer.get_line(), $2); }
+							|	"escriba" argument-list-with-string					{ $$ = new WriteNode(lexer.get_line(), $2); }
+							|	"lea" lvalue										{ $$ = new ReadNode(lexer.get_line(), $2); }
 ;
 argument-list-with-string	:	argument-list-with-string ',' expr					{
 																						$$ = $1;
@@ -220,59 +221,59 @@ argument-list-with-string	:	argument-list-with-string ',' expr					{
 																						ASTNodeList::add_to_list($$, $3);
 							 														}
 							|	expr												{
-																						$$ = new ArgumentList();
+																						$$ = new ArgumentList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 							|	TK_STRING_LITERAL									{
-																						$$ = new ArgumentList();
+																						$$ = new ArgumentList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 ;
 else.opt					:	%empty												{ $$ = NULL; }
 							|	"sino"
 								eols.opt
-								statement-list.opt									{ $$ = new ElseStatement($3); }
+								statement-list.opt									{ $$ = new ElseStatement(lexer.get_line(), $3); }
 ;
-assign						:	lvalue "<-" expr									{ $$ = new AssignStatement($1, $3); }
+assign						:	lvalue "<-" expr									{ $$ = new AssignStatement(lexer.get_line(), $1, $3); }
 ;
-lvalue						:	TK_ID												{ $$ = new LeftValue($1, NULL); }
-							|	TK_ID '[' expr ']'									{ $$ = new LeftValue($1, $3); }
+lvalue						:	TK_ID												{ $$ = new LeftValue(lexer.get_line(), $1, NULL); }
+							|	TK_ID '[' expr ']'									{ $$ = new LeftValue(lexer.get_line(), $1, $3); }
 ;
-expr						:	expr '=' term										{ $$ = new EqualExpr($1, $3); }
-							|	expr "<>" term										{ $$ = new NotEqualExpr($1, $3); }
-							|	expr '<' term										{ $$ = new LessThanExpr($1, $3); }
-							|	expr '>' term										{ $$ = new GreaterThanExpr($1, $3); }
-							|	expr "<=" term										{ $$ = new LessThanOrEqualExpr($1, $3); }
-							|	expr ">=" term										{ $$ = new GreaterThanOrEqualExpr($1, $3); }
+expr						:	expr '=' term										{ $$ = new EqualExpr(lexer.get_line(), $1, $3); }
+							|	expr "<>" term										{ $$ = new NotEqualExpr(lexer.get_line(), $1, $3); }
+							|	expr '<' term										{ $$ = new LessThanExpr(lexer.get_line(), $1, $3); }
+							|	expr '>' term										{ $$ = new GreaterThanExpr(lexer.get_line(), $1, $3); }
+							|	expr "<=" term										{ $$ = new LessThanOrEqualExpr(lexer.get_line(), $1, $3); }
+							|	expr ">=" term										{ $$ = new GreaterThanOrEqualExpr(lexer.get_line(), $1, $3); }
 							|	term												{ $$ = $1; }
 ;
-term						:	term '+' factor										{ $$ = new AdditionExpr($1, $3); }
-							|	term '-' factor										{ $$ = new SubtractionExpr($1, $3); }
-							|	term 'o' factor										{ $$ = new OrExpr($1, $3); }
+term						:	term '+' factor										{ $$ = new AdditionExpr(lexer.get_line(), $1, $3); }
+							|	term '-' factor										{ $$ = new SubtractionExpr(lexer.get_line(), $1, $3); }
+							|	term 'o' factor										{ $$ = new OrExpr(lexer.get_line(), $1, $3); }
 							|	factor												{ $$ = $1; }
 ;
-factor						:	factor '*' exponent									{ $$ = new MultiplicationExpr($1, $3); }
-							|	factor "div" exponent								{ $$ = new DivisionExpr($1, $3); }
-							|	factor "mod" exponent								{ $$ = new ModExpr($1, $3); }
-							|	factor 'y' exponent									{ $$ = new AndExpr($1, $3); }
+factor						:	factor '*' exponent									{ $$ = new MultiplicationExpr(lexer.get_line(), $1, $3); }
+							|	factor "div" exponent								{ $$ = new DivisionExpr(lexer.get_line(), $1, $3); }
+							|	factor "mod" exponent								{ $$ = new ModExpr(lexer.get_line(), $1, $3); }
+							|	factor 'y' exponent									{ $$ = new AndExpr(lexer.get_line(), $1, $3); }
 							|	exponent											{ $$ = $1; }
 ;
-exponent					:	exponent '^' rvalue									{ $$ = new PowerExpr($1, $3); }
+exponent					:	exponent '^' rvalue									{ $$ = new PowerExpr(lexer.get_line(), $1, $3); }
 							|	rvalue												{ $$ = $1; }
 ;
 rvalue						:	'(' expr ')'										{ $$ = $2; }
 							|	constant											{ $$ = $1; }
-							|	'-' expr											{ $$ = new NegativeExpr($2); }
+							|	'-' expr											{ $$ = new NegativeExpr(lexer.get_line(), $2); }
 							|	lvalue												{ $$ = $1; }
 							|	subprogram-call										{ $$ = $1; }
-							|	"no" expr											{ $$ = new NegateExpr($2); }
+							|	"no" expr											{ $$ = new NegateExpr(lexer.get_line(), $2); }
 ;
 constant					:	TK_NUMBER											{ $$ = $1; }
 							|	TK_CHARACTER_LITERAL								{ $$ = $1; }
-							|	"verdadero"											{ $$ = new BooleanNode(true); }
-							|	"falso"												{ $$ = new BooleanNode(false); }
+							|	"verdadero"											{ $$ = new BooleanNode(lexer.get_line(), true); }
+							|	"falso"												{ $$ = new BooleanNode(lexer.get_line(), false); }
 ;
-subprogram-call				:	TK_ID '(' argument-list.opt ')'						{ $$ = new SubprogramCall($1, $3); }
+subprogram-call				:	TK_ID '(' argument-list.opt ')'						{ $$ = new SubprogramCall(lexer.get_line(), $1, $3); }
 ;
 argument-list.opt			:	%empty												{ $$ = NULL; }
 							|	argument-list										{ $$ = $1; }
@@ -282,16 +283,17 @@ argument-list				:	argument-list ',' expr								{
 																						ASTNodeList::add_to_list($$, $3);
 																					}
 							|	expr												{
-																						$$ = new ArgumentList();
+																						$$ = new ArgumentList(lexer.get_line());
 																						ASTNodeList::add_to_list($$, $1);
 																					}
 ;
 
 %%
 
-void yyerror(ASTNode **program_node, const char *msg)
+void yyerror(ASTNode **program_node,
+			 const char *msg)
 {
-	std::cerr << "[line " << lexer.get_line() << "]" << msg <<std::endl;
+	std::cerr << "[line " << lexer.get_line() << "]" << msg << std::endl;
 }
 
 int yylex()

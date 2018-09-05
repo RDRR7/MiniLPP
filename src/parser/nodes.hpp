@@ -5,20 +5,24 @@
 #include <string>
 #include <list>
 
-#define DEFINE_BINARY_EXPR(name, prec, oper)       \
-	class name##Expr : public BinaryExpr           \
-	{                                              \
-	  public:                                      \
-		name##Expr(ASTNode *expr1, ASTNode *expr2) \
-			: BinaryExpr(expr1, expr2) {}          \
-		int get_precedence() const                 \
-		{                                          \
-			return prec;                           \
-		}                                          \
-		std::string get_oper() const               \
-		{                                          \
-			return oper;                           \
-		}                                          \
+#define DEFINE_BINARY_EXPR(name, prec, oper) \
+	class name##Expr : public BinaryExpr     \
+	{                                        \
+	  public:                                \
+		name##Expr(int line,                 \
+				   ASTNode *expr1,           \
+				   ASTNode *expr2)           \
+			: BinaryExpr(line,               \
+						 expr1,              \
+						 expr2) {}           \
+		int get_precedence() const           \
+		{                                    \
+			return prec;                     \
+		}                                    \
+		std::string get_oper() const         \
+		{                                    \
+			return oper;                     \
+		}                                    \
 	};
 
 enum class TypeEnum : unsigned int
@@ -39,23 +43,33 @@ enum class NodeEnum : unsigned int
 class ASTNode
 {
   public:
-	ASTNode() {}
+	ASTNode(int line)
+		: line(line) {}
 	virtual ~ASTNode() {}
 	virtual std::string to_string() const = 0;
 	virtual NodeEnum get_type() const
 	{
 		return NodeEnum::Other;
 	}
+	int get_line() const
+	{
+		return line;
+	}
+
+  private:
+	int line;
 };
 
 class ProgramNode : public ASTNode
 {
   public:
-	ProgramNode(ASTNode *type_definition_section,
+	ProgramNode(int line,
+				ASTNode *type_definition_section,
 				ASTNode *variable_section,
 				ASTNode *subprogram_decl,
 				ASTNode *statement_list)
-		: type_definition_section(type_definition_section),
+		: ASTNode(line),
+		  type_definition_section(type_definition_section),
 		  variable_section(variable_section),
 		  subprogram_decl(subprogram_decl),
 		  statement_list(statement_list) {}
@@ -78,7 +92,8 @@ class ProgramNode : public ASTNode
 class ASTNodeList : public ASTNode
 {
   public:
-	ASTNodeList() {}
+	ASTNodeList(int line)
+		: ASTNode(line) {}
 	~ASTNodeList() override
 	{
 		while (!ast_nodes.empty())
@@ -99,7 +114,8 @@ class ASTNodeList : public ASTNode
 	{
 		return NodeEnum::List;
 	}
-	static void add_to_list(ASTNode *list, ASTNode *element);
+	static void add_to_list(ASTNode *list,
+							ASTNode *element);
 
   private:
 	std::list<ASTNode *> ast_nodes;
@@ -108,16 +124,19 @@ class ASTNodeList : public ASTNode
 class TypeDefinitionList : public ASTNodeList
 {
   public:
-	TypeDefinitionList() {}
+	TypeDefinitionList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class TypeDefinition : public ASTNode
 {
   public:
-	TypeDefinition(ASTNode *id,
+	TypeDefinition(int line,
+				   ASTNode *id,
 				   ASTNode *type)
-		: id(id),
+		: ASTNode(line),
+		  id(id),
 		  type(type) {}
 	~TypeDefinition() override
 	{
@@ -134,11 +153,13 @@ class TypeDefinition : public ASTNode
 class Type : public ASTNode
 {
   public:
-	Type(TypeEnum type,
+	Type(int line,
+		 TypeEnum type,
 		 ASTNode *array_size,
 		 ASTNode *user_type,
 		 ASTNode *array_type)
-		: type(type),
+		: ASTNode(line),
+		  type(type),
 		  array_size(array_size),
 		  user_type(user_type),
 		  array_type(array_type) {}
@@ -160,8 +181,10 @@ class Type : public ASTNode
 class StringNode : public ASTNode
 {
   public:
-	StringNode(std::string id)
-		: id(id) {}
+	StringNode(int line,
+			   std::string id)
+		: ASTNode(line),
+		  id(id) {}
 	std::string to_string() const override
 	{
 		return id;
@@ -174,7 +197,8 @@ class StringNode : public ASTNode
 class Expr : public ASTNode
 {
   public:
-	Expr() {}
+	Expr(int line)
+		: ASTNode(line) {}
 	virtual std::string to_string() const = 0;
 	std::string get_oper() const
 	{
@@ -189,8 +213,10 @@ class Expr : public ASTNode
 class NumberNode : public Expr
 {
   public:
-	NumberNode(int number)
-		: number(number) {}
+	NumberNode(int line,
+			   int number)
+		: Expr(line),
+		  number(number) {}
 	std::string to_string() const override
 	{
 		return std::to_string(number);
@@ -203,16 +229,19 @@ class NumberNode : public Expr
 class VariableSectionList : public ASTNodeList
 {
   public:
-	VariableSectionList() {}
+	VariableSectionList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const;
 };
 
 class VariableSection : public ASTNode
 {
   public:
-	VariableSection(ASTNode *ids,
+	VariableSection(int line,
+					ASTNode *ids,
 					ASTNode *type)
-		: ids(ids),
+		: ASTNode(line),
+		  ids(ids),
 		  type(type) {}
 	~VariableSection() override
 	{
@@ -229,24 +258,28 @@ class VariableSection : public ASTNode
 class IdList : public ASTNodeList
 {
   public:
-	IdList() {}
+	IdList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class SubprogramDeclList : public ASTNodeList
 {
   public:
-	SubprogramDeclList() {}
+	SubprogramDeclList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class SubprogramDecl : public ASTNode
 {
   public:
-	SubprogramDecl(ASTNode *header,
+	SubprogramDecl(int line,
+				   ASTNode *header,
 				   ASTNode *variable_section,
 				   ASTNode *statements)
-		: header(header),
+		: ASTNode(line),
+		  header(header),
 		  variable_section(variable_section),
 		  statements(statements) {}
 	~SubprogramDecl() override
@@ -266,10 +299,12 @@ class SubprogramDecl : public ASTNode
 class SubprogramDeclHeader : public ASTNode
 {
   public:
-	SubprogramDeclHeader(ASTNode *id,
+	SubprogramDeclHeader(int line,
+						 ASTNode *id,
 						 ASTNode *arguments,
 						 ASTNode *type)
-		: id(id),
+		: ASTNode(line),
+		  id(id),
 		  arguments(arguments),
 		  type(type) {}
 	~SubprogramDeclHeader() override
@@ -289,17 +324,20 @@ class SubprogramDeclHeader : public ASTNode
 class ArgumentDeclList : public ASTNodeList
 {
   public:
-	ArgumentDeclList() {}
+	ArgumentDeclList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class ArgumentDecl : public ASTNode
 {
   public:
-	ArgumentDecl(ASTNode *type,
+	ArgumentDecl(int line,
+				 ASTNode *type,
 				 ASTNode *id,
 				 bool var)
-		: type(type),
+		: ASTNode(line),
+		  type(type),
 		  id(id),
 		  var(var) {}
 	~ArgumentDecl() override
@@ -318,16 +356,19 @@ class ArgumentDecl : public ASTNode
 class StatementList : public ASTNodeList
 {
   public:
-	StatementList() {}
+	StatementList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class AssignStatement : public ASTNode
 {
   public:
-	AssignStatement(ASTNode *lvalue,
+	AssignStatement(int line,
+					ASTNode *lvalue,
 					ASTNode *expr)
-		: lvalue(lvalue),
+		: ASTNode(line),
+		  lvalue(lvalue),
 		  expr(expr) {}
 	~AssignStatement() override
 	{
@@ -344,9 +385,11 @@ class AssignStatement : public ASTNode
 class LeftValue : public Expr
 {
   public:
-	LeftValue(ASTNode *id,
+	LeftValue(int line,
+			  ASTNode *id,
 			  ASTNode *index)
-		: id(id),
+		: Expr(line),
+		  id(id),
 		  index(index) {}
 	~LeftValue() override
 	{
@@ -363,9 +406,11 @@ class LeftValue : public Expr
 class BinaryExpr : public Expr
 {
   public:
-	BinaryExpr(ASTNode *expr1,
+	BinaryExpr(int line,
+			   ASTNode *expr1,
 			   ASTNode *expr2)
-		: expr1(expr1),
+		: Expr(line),
+		  expr1(expr1),
 		  expr2(expr2) {}
 	~BinaryExpr() override
 	{
@@ -399,8 +444,10 @@ DEFINE_BINARY_EXPR(Power, 3, "^");
 class NegativeExpr : public Expr
 {
   public:
-	NegativeExpr(ASTNode *expr)
-		: expr(expr) {}
+	NegativeExpr(int line,
+				 ASTNode *expr)
+		: Expr(line),
+		  expr(expr) {}
 	~NegativeExpr() override
 	{
 		delete expr;
@@ -414,8 +461,10 @@ class NegativeExpr : public Expr
 class StringLiteralNode : public ASTNode
 {
   public:
-	StringLiteralNode(std::string string_literal)
-		: string_literal(string_literal) {}
+	StringLiteralNode(int line,
+					  std::string string_literal)
+		: ASTNode(line),
+		  string_literal(string_literal) {}
 	std::string to_string() const override
 	{
 		return string_literal;
@@ -428,8 +477,10 @@ class StringLiteralNode : public ASTNode
 class CharacterLiteralNode : public Expr
 {
   public:
-	CharacterLiteralNode(std::string character_literal)
-		: character_literal(character_literal) {}
+	CharacterLiteralNode(int line,
+						 std::string character_literal)
+		: Expr(line),
+		  character_literal(character_literal) {}
 	std::string to_string() const override
 	{
 		return character_literal;
@@ -442,8 +493,10 @@ class CharacterLiteralNode : public Expr
 class BooleanNode : public Expr
 {
   public:
-	BooleanNode(bool boolean)
-		: boolean(boolean) {}
+	BooleanNode(int line,
+				bool boolean)
+		: Expr(line),
+		  boolean(boolean) {}
 	std::string to_string() const override;
 
   private:
@@ -453,9 +506,11 @@ class BooleanNode : public Expr
 class SubprogramCall : public Expr
 {
   public:
-	SubprogramCall(ASTNode *id,
+	SubprogramCall(int line,
+				   ASTNode *id,
 				   ASTNode *argument_list)
-		: id(id),
+		: Expr(line),
+		  id(id),
 		  argument_list(argument_list) {}
 	~SubprogramCall() override
 	{
@@ -472,15 +527,18 @@ class SubprogramCall : public Expr
 class ArgumentList : public ASTNodeList
 {
   public:
-	ArgumentList() {}
+	ArgumentList(int line)
+		: ASTNodeList(line) {}
 	std::string to_string() const override;
 };
 
 class CallStatement : public ASTNode
 {
   public:
-	CallStatement(ASTNode *call)
-		: call(call) {}
+	CallStatement(int line,
+				  ASTNode *call)
+		: ASTNode(line),
+		  call(call) {}
 	~CallStatement() override
 	{
 		delete call;
@@ -494,10 +552,12 @@ class CallStatement : public ASTNode
 class IfStatement : public ASTNode
 {
   public:
-	IfStatement(ASTNode *expr,
+	IfStatement(int line,
+				ASTNode *expr,
 				ASTNode *statement_list,
 				ASTNode *else_statement)
-		: expr(expr),
+		: ASTNode(line),
+		  expr(expr),
 		  statement_list(statement_list),
 		  else_statement(else_statement) {}
 	~IfStatement() override
@@ -517,8 +577,10 @@ class IfStatement : public ASTNode
 class ElseStatement : public ASTNode
 {
   public:
-	ElseStatement(ASTNode *statement_list)
-		: statement_list(statement_list) {}
+	ElseStatement(int line,
+				  ASTNode *statement_list)
+		: ASTNode(line),
+		  statement_list(statement_list) {}
 	~ElseStatement() override
 	{
 		delete statement_list;
@@ -532,9 +594,11 @@ class ElseStatement : public ASTNode
 class WhileStatement : public ASTNode
 {
   public:
-	WhileStatement(ASTNode *expr,
+	WhileStatement(int line,
+				   ASTNode *expr,
 				   ASTNode *statement_list)
-		: expr(expr),
+		: ASTNode(line),
+		  expr(expr),
 		  statement_list(statement_list) {}
 	~WhileStatement() override
 	{
@@ -551,10 +615,12 @@ class WhileStatement : public ASTNode
 class ForStatement : public ASTNode
 {
   public:
-	ForStatement(ASTNode *assign,
+	ForStatement(int line,
+				 ASTNode *assign,
 				 ASTNode *expr,
 				 ASTNode *statement_list)
-		: assign(assign),
+		: ASTNode(line),
+		  assign(assign),
 		  expr(expr),
 		  statement_list(statement_list) {}
 	~ForStatement() override
@@ -574,9 +640,11 @@ class ForStatement : public ASTNode
 class NotDoWhileStatement : public ASTNode
 {
   public:
-	NotDoWhileStatement(ASTNode *expr,
+	NotDoWhileStatement(int line,
+						ASTNode *expr,
 						ASTNode *statement_list)
-		: expr(expr),
+		: ASTNode(line),
+		  expr(expr),
 		  statement_list(statement_list) {}
 	~NotDoWhileStatement() override
 	{
@@ -593,8 +661,10 @@ class NotDoWhileStatement : public ASTNode
 class ReturnNode : public ASTNode
 {
   public:
-	ReturnNode(ASTNode *expr)
-		: expr(expr) {}
+	ReturnNode(int line,
+			   ASTNode *expr)
+		: ASTNode(line),
+		  expr(expr) {}
 	~ReturnNode() override
 	{
 		delete expr;
@@ -608,8 +678,10 @@ class ReturnNode : public ASTNode
 class WriteNode : public ASTNode
 {
   public:
-	WriteNode(ASTNode *argument_list)
-		: argument_list(argument_list) {}
+	WriteNode(int line,
+			  ASTNode *argument_list)
+		: ASTNode(line),
+		  argument_list(argument_list) {}
 	~WriteNode() override
 	{
 		delete argument_list;
@@ -623,8 +695,10 @@ class WriteNode : public ASTNode
 class ReadNode : public ASTNode
 {
   public:
-	ReadNode(ASTNode *expr)
-		: expr(expr) {}
+	ReadNode(int line,
+			 ASTNode *expr)
+		: ASTNode(line),
+		  expr(expr) {}
 	~ReadNode() override
 	{
 		delete expr;
@@ -638,8 +712,10 @@ class ReadNode : public ASTNode
 class NegateExpr : public Expr
 {
   public:
-	NegateExpr(ASTNode *expr)
-		: expr(expr) {}
+	NegateExpr(int line,
+			   ASTNode *expr)
+		: Expr(line),
+		  expr(expr) {}
 	~NegateExpr() override
 	{
 		delete expr;
