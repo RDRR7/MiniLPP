@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 std::unordered_map<std::string, ASTNode *> type_definitions;
-std::unordered_map<std::string, std::unordered_map<std::string, ASTNode *>> variables;
+std::unordered_map<std::string, std::unordered_map<std::string, ASTNode *>> functions_variables;
 
 std::string ProgramNode::to_string() const
 {
@@ -436,7 +436,7 @@ std::string NegateExpr::to_string() const
 
 void ASTNodeList::add_to_list(ASTNode *list, ASTNode *element)
 {
-	assert(list->get_type() == NodeEnum::List);
+	assert(list->get_type() == NodeEnum::ASTNodeList);
 	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(list);
 	ast_node_list->get_pointer_to_ast_nodes()->push_back(element);
 }
@@ -474,8 +474,7 @@ void TypeDefinition::pre_syntax_analysis(std::string context)
 	{
 		std::cerr << "[line "
 				  << get_line()
-				  << "] "
-				  << "'"
+				  << "] '"
 				  << id_str
 				  << "' was already defined"
 				  << std::endl;
@@ -497,7 +496,7 @@ void VariableSectionList::pre_syntax_analysis(std::string context)
 
 void VariableSection::pre_syntax_analysis(std::string context)
 {
-	assert(ids->get_type() == NodeEnum::List);
+	assert(ids->get_type() == NodeEnum::ASTNodeList);
 	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(ids);
 	auto ids_list = ast_node_list->get_ast_nodes();
 	for (auto id : ids_list)
@@ -505,12 +504,13 @@ void VariableSection::pre_syntax_analysis(std::string context)
 		assert(id->get_type() == NodeEnum::StringNode);
 		StringNode *string_node = static_cast<StringNode *>(id);
 		const std::string id_str = string_node->get_id();
-		if (variables[context].find(id_str) != variables[context].end())
+		if (functions_variables[context].find(id_str) != functions_variables[context].end())
 		{
 			std::cerr << "[line "
 					  << string_node->get_line()
-					  << "] "
-					  << "'"
+					  << "]<"
+					  << context
+					  << "> '"
 					  << id_str
 					  << "' was already defined"
 					  << std::endl;
@@ -518,7 +518,88 @@ void VariableSection::pre_syntax_analysis(std::string context)
 		}
 		else
 		{
-			variables[context][id_str] = type;
+			functions_variables[context][id_str] = type;
 		}
+	}
+}
+
+void SubprogramDeclList::pre_syntax_analysis(std::string context)
+{
+	for (auto subprogram_decl : get_ast_nodes())
+	{
+		subprogram_decl->pre_syntax_analysis(context);
+	}
+}
+
+void SubprogramDecl::pre_syntax_analysis(std::string context)
+{
+	assert(header->get_type() == NodeEnum::SubprogramDeclHeader);
+	SubprogramDeclHeader *subprogram_decl_header = static_cast<SubprogramDeclHeader *>(header);
+	ASTNode *id = subprogram_decl_header->get_id();
+
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+	if (functions_variables.find(id_str) != functions_variables.end())
+	{
+		std::cerr << "[line "
+				  << string_node->get_line()
+				  << "] '"
+				  << id_str
+				  << "' was already defined"
+				  << std::endl;
+		exit(1);
+	}
+	else
+	{
+		functions_variables[id_str];
+		subprogram_decl_header->pre_syntax_analysis(id_str);
+		if (variable_section != NULL)
+		{
+			variable_section->pre_syntax_analysis(id_str);
+		}
+	}
+}
+
+void SubprogramDeclHeader::pre_syntax_analysis(std::string context)
+{
+	if (type != NULL)
+	{
+		functions_variables[context][RETURN_TYPE] = type;
+	}
+	if (arguments != NULL)
+	{
+		arguments->pre_syntax_analysis(context);
+	}
+}
+
+void ArgumentDeclList::pre_syntax_analysis(std::string context)
+{
+	for (auto argument_decl : get_ast_nodes())
+	{
+		argument_decl->pre_syntax_analysis(context);
+	}
+}
+
+void ArgumentDecl::pre_syntax_analysis(std::string context)
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+	if (functions_variables[context].find(id_str) != functions_variables[context].end())
+	{
+		std::cerr << "[line "
+				  << string_node->get_line()
+				  << "]<"
+				  << context
+				  << "> '"
+				  << id_str
+				  << "' was already defined"
+				  << std::endl;
+		exit(1);
+	}
+	else
+	{
+		functions_variables[context][id_str] = type;
 	}
 }

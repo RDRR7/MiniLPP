@@ -7,6 +7,7 @@
 %{
 
 #include <fstream>
+#include <algorithm>
 #include "lexer.hpp"
 #include "parser.hpp"
 
@@ -111,7 +112,9 @@ Lexer::~Lexer()
 
 std::string Lexer::get_lexeme() const
 {
-	return yyget_text(scanner);
+	std::string lexeme = yyget_text(scanner);
+	std::transform(lexeme.begin(), lexeme.end(), lexeme.begin(), ::tolower);
+	return lexeme;
 }
 
 int Lexer::get_line() const

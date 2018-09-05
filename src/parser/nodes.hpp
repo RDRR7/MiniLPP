@@ -6,6 +6,7 @@
 #include <list>
 
 #define GLOBAL_CONTEXT "GLOBAL_CONTEXT"
+#define RETURN_TYPE "RETURN_TYPE"
 #define DEFINE_BINARY_EXPR(name, prec, oper) \
 	class name##Expr : public BinaryExpr     \
 	{                                        \
@@ -37,8 +38,9 @@ enum class TypeEnum : unsigned int
 
 enum class NodeEnum : unsigned int
 {
-	List = 1,
+	ASTNodeList = 1,
 	StringNode = 2,
+	SubprogramDeclHeader = 3,
 	Other = 255,
 };
 
@@ -116,7 +118,7 @@ class ASTNodeList : public ASTNode
 	}
 	NodeEnum get_type() const override
 	{
-		return NodeEnum::List;
+		return NodeEnum::ASTNodeList;
 	}
 	static void add_to_list(ASTNode *list,
 							ASTNode *element);
@@ -285,6 +287,7 @@ class SubprogramDeclList : public ASTNodeList
 	SubprogramDeclList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 };
 
 class SubprogramDecl : public ASTNode
@@ -305,6 +308,7 @@ class SubprogramDecl : public ASTNode
 		delete statements;
 	}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *header;
@@ -330,6 +334,15 @@ class SubprogramDeclHeader : public ASTNode
 		delete type;
 	}
 	std::string to_string() const override;
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::SubprogramDeclHeader;
+	}
+	ASTNode *get_id()
+	{
+		return id;
+	}
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *id;
@@ -343,6 +356,7 @@ class ArgumentDeclList : public ASTNodeList
 	ArgumentDeclList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 };
 
 class ArgumentDecl : public ASTNode
@@ -362,6 +376,7 @@ class ArgumentDecl : public ASTNode
 		delete id;
 	}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *type;
