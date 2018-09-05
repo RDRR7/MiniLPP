@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 
+#define GLOBAL_CONTEXT "GLOBAL_CONTEXT"
 #define DEFINE_BINARY_EXPR(name, prec, oper) \
 	class name##Expr : public BinaryExpr     \
 	{                                        \
@@ -37,6 +38,7 @@ enum class TypeEnum : unsigned int
 enum class NodeEnum : unsigned int
 {
 	List = 1,
+	StringNode = 2,
 	Other = 255,
 };
 
@@ -55,6 +57,7 @@ class ASTNode
 	{
 		return line;
 	}
+	virtual void pre_syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 
   private:
 	int line;
@@ -81,6 +84,7 @@ class ProgramNode : public ASTNode
 		delete statement_list;
 	}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *type_definition_section;
@@ -127,6 +131,7 @@ class TypeDefinitionList : public ASTNodeList
 	TypeDefinitionList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 };
 
 class TypeDefinition : public ASTNode
@@ -144,6 +149,7 @@ class TypeDefinition : public ASTNode
 		delete type;
 	}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *id;
@@ -186,6 +192,14 @@ class StringNode : public ASTNode
 		: ASTNode(line),
 		  id(id) {}
 	std::string to_string() const override
+	{
+		return id;
+	}
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::StringNode;
+	}
+	std::string get_id() const
 	{
 		return id;
 	}
@@ -232,6 +246,7 @@ class VariableSectionList : public ASTNodeList
 	VariableSectionList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const;
+	void pre_syntax_analysis(std::string context) override;
 };
 
 class VariableSection : public ASTNode
@@ -249,6 +264,7 @@ class VariableSection : public ASTNode
 		delete type;
 	}
 	std::string to_string() const override;
+	void pre_syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *ids;

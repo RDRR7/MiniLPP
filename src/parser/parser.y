@@ -293,7 +293,7 @@ argument-list				:	argument-list ',' expr								{
 void yyerror(ASTNode **program_node,
 			 const char *msg)
 {
-	std::cerr << "[line " << lexer.get_line() << "]" << msg << std::endl;
+	std::cerr << "[line " << lexer.get_line() << "] " << msg << std::endl;
 }
 
 int yylex()

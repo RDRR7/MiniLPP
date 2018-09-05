@@ -1,5 +1,9 @@
 #include "nodes.hpp"
 #include <cassert>
+#include <unordered_map>
+
+std::unordered_map<std::string, ASTNode *> type_definitions;
+std::unordered_map<std::string, std::unordered_map<std::string, ASTNode *>> variables;
 
 std::string ProgramNode::to_string() const
 {
@@ -435,4 +439,86 @@ void ASTNodeList::add_to_list(ASTNode *list, ASTNode *element)
 	assert(list->get_type() == NodeEnum::List);
 	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(list);
 	ast_node_list->get_pointer_to_ast_nodes()->push_back(element);
+}
+
+void ProgramNode::pre_syntax_analysis(std::string context)
+{
+	if (type_definition_section != NULL)
+	{
+		type_definition_section->pre_syntax_analysis(context);
+	}
+	if (variable_section != NULL)
+	{
+		variable_section->pre_syntax_analysis(context);
+	}
+	if (subprogram_decl != NULL)
+	{
+		subprogram_decl->pre_syntax_analysis(context);
+	}
+}
+
+void TypeDefinitionList::pre_syntax_analysis(std::string context)
+{
+	for (auto type_definition : get_ast_nodes())
+	{
+		type_definition->pre_syntax_analysis(context);
+	}
+}
+
+void TypeDefinition::pre_syntax_analysis(std::string context)
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+	if (type_definitions.find(id_str) != type_definitions.end())
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "] "
+				  << "'"
+				  << id_str
+				  << "' was already defined"
+				  << std::endl;
+		exit(1);
+	}
+	else
+	{
+		type_definitions[id_str] = type;
+	}
+}
+
+void VariableSectionList::pre_syntax_analysis(std::string context)
+{
+	for (auto variable_section : get_ast_nodes())
+	{
+		variable_section->pre_syntax_analysis(context);
+	}
+}
+
+void VariableSection::pre_syntax_analysis(std::string context)
+{
+	assert(ids->get_type() == NodeEnum::List);
+	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(ids);
+	auto ids_list = ast_node_list->get_ast_nodes();
+	for (auto id : ids_list)
+	{
+		assert(id->get_type() == NodeEnum::StringNode);
+		StringNode *string_node = static_cast<StringNode *>(id);
+		const std::string id_str = string_node->get_id();
+		if (variables[context].find(id_str) != variables[context].end())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "] "
+					  << "'"
+					  << id_str
+					  << "' was already defined"
+					  << std::endl;
+			exit(1);
+		}
+		else
+		{
+			variables[context][id_str] = type;
+		}
+	}
 }
