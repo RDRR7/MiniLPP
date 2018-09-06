@@ -446,6 +446,7 @@ void ASTNodeList::add_to_list(ASTNode *list, ASTNode *element)
 
 void ProgramNode::pre_syntax_analysis(std::string context)
 {
+	/*---- Should add LPP functions ----*/
 	if (type_definition_section != NULL)
 	{
 		type_definition_section->pre_syntax_analysis(context);
@@ -918,7 +919,7 @@ TypeEnum OrExpr::infer_type(std::string context) const
 		expr1_type != TypeEnum::ArregloDeCaracter &&
 		expr1_type != TypeEnum::ArregloDeBooleano)
 	{
-		return TypeEnum::Booleano;
+		return expr1_type;
 	}
 	else
 	{
@@ -1035,7 +1036,7 @@ TypeEnum AndExpr::infer_type(std::string context) const
 		expr1_type != TypeEnum::ArregloDeCaracter &&
 		expr1_type != TypeEnum::ArregloDeBooleano)
 	{
-		return TypeEnum::Booleano;
+		return expr1_type;
 	}
 	else
 	{
