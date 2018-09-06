@@ -603,3 +603,548 @@ void ArgumentDecl::pre_syntax_analysis(std::string context)
 		functions_variables[context][id_str] = type;
 	}
 }
+
+TypeEnum LeftValue::infer_type(std::string context) const
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+	bool in_global_context = functions_variables[GLOBAL_CONTEXT].find(id_str) !=
+							 functions_variables[GLOBAL_CONTEXT].end();
+	bool in_context_context = functions_variables[context].find(id_str) !=
+							  functions_variables[context].end();
+	if (!in_global_context && !in_context_context)
+	{
+		std::cerr << "[line "
+				  << string_node->get_line()
+				  << "]<"
+				  << context
+				  << "> '"
+				  << id_str
+				  << "' is undefined"
+				  << std::endl;
+		exit(1);
+	}
+	std::string lookup_context = GLOBAL_CONTEXT;
+	if (in_context_context)
+	{
+		lookup_context = context;
+	}
+	assert(functions_variables[lookup_context][id_str]->get_type() == NodeEnum::Type);
+	Type *type = static_cast<Type *>(functions_variables[lookup_context][id_str]);
+	TypeEnum possible_type = type->infer_type(context);
+	if (index != NULL)
+	{
+		assert(index->get_type() == NodeEnum::Expr);
+		Expr *expr = static_cast<Expr *>(index);
+		if (expr->infer_type(context) != TypeEnum::Entero)
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' expression must be 'entero'"
+					  << std::endl;
+			exit(1);
+		}
+		switch (possible_type)
+		{
+		case TypeEnum::ArregloDeEntero:
+			return TypeEnum::Entero;
+		case TypeEnum::ArregloDeCaracter:
+			return TypeEnum::Caracter;
+		case TypeEnum::ArregloDeBooleano:
+			return TypeEnum::Booleano;
+		default:
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' is not an array"
+					  << std::endl;
+			exit(1);
+		}
+	}
+	return possible_type;
+}
+
+TypeEnum EqualExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum NotEqualExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum LessThanExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum GreaterThanExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum LessThanOrEqualExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum GreaterThanOrEqualExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum AdditionExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::Booleano &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum SubtractionExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::Booleano &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum OrExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum MultiplicationExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::Booleano &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum DivisionExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum ModExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum AndExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum PowerExpr::infer_type(std::string context) const
+{
+	assert(get_expr1()->get_type() == NodeEnum::Expr);
+	Expr *expr1_as_expr = static_cast<Expr *>(get_expr1());
+	assert(get_expr2()->get_type() == NodeEnum::Expr);
+	Expr *expr2_as_expr = static_cast<Expr *>(get_expr2());
+	TypeEnum expr1_type = expr1_as_expr->infer_type(context);
+	TypeEnum expr2_type = expr2_as_expr->infer_type(context);
+
+	if (expr1_type == expr2_type &&
+		expr1_type != TypeEnum::Caracter &&
+		expr1_type != TypeEnum::Booleano &&
+		expr1_type != TypeEnum::ArregloDeEntero &&
+		expr1_type != TypeEnum::ArregloDeCaracter &&
+		expr1_type != TypeEnum::ArregloDeBooleano)
+	{
+		return expr1_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible types"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+/*---- Change != to == ⬆ ----*/
+
+TypeEnum NegativeExpr::infer_type(std::string context) const
+{
+	assert(expr->get_type() == NodeEnum::Expr);
+	Expr *expr_as_expr = static_cast<Expr *>(expr);
+	TypeEnum expr_type = expr_as_expr->infer_type(context);
+
+	if (expr_type == TypeEnum::Entero)
+	{
+		return expr_type;
+	}
+	else
+	{
+		std::cerr << "[line "
+				  << get_line()
+				  << "]<"
+				  << context
+				  << "> expression with incompatible type"
+				  << std::endl;
+		exit(1);
+	}
+}
+
+TypeEnum SubprogramCall::infer_type(std::string context) const
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+	if (functions_variables.find(id_str) == functions_variables.end())
+	{
+		std::cerr << "[line "
+				  << string_node->get_line()
+				  << "]<"
+				  << context
+				  << "> '"
+				  << id_str
+				  << "' is not defined"
+				  << std::endl;
+		exit(1);
+	}
+	else
+	{
+		if (functions_variables[id_str].find(RETURN_TYPE) == functions_variables[id_str].end())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' is a procedure"
+					  << std::endl;
+			exit(1);
+		}
+		assert(functions_variables[id_str][RETURN_TYPE]->get_type() == NodeEnum::Type);
+		Type *type = static_cast<Type *>(functions_variables[id_str][RETURN_TYPE]);
+		return type->infer_type(context);
+	}
+}
+
+TypeEnum NegateExpr::infer_type(std::string context) const
+{
+	assert(expr->get_type() == NodeEnum::Expr);
+	Expr *expr_as_expr = static_cast<Expr *>(expr);
+	return expr_as_expr->infer_type(context);
+}
+
+TypeEnum Type::infer_type(std::string context) const
+{
+	return TypeEnum::Entero;
+}

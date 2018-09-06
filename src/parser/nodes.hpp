@@ -7,24 +7,25 @@
 
 #define GLOBAL_CONTEXT "GLOBAL_CONTEXT"
 #define RETURN_TYPE "RETURN_TYPE"
-#define DEFINE_BINARY_EXPR(name, prec, oper) \
-	class name##Expr : public BinaryExpr     \
-	{                                        \
-	  public:                                \
-		name##Expr(int line,                 \
-				   ASTNode *expr1,           \
-				   ASTNode *expr2)           \
-			: BinaryExpr(line,               \
-						 expr1,              \
-						 expr2) {}           \
-		int get_precedence() const           \
-		{                                    \
-			return prec;                     \
-		}                                    \
-		std::string get_oper() const         \
-		{                                    \
-			return oper;                     \
-		}                                    \
+#define DEFINE_BINARY_EXPR(name, prec, oper)                     \
+	class name##Expr : public BinaryExpr                         \
+	{                                                            \
+	  public:                                                    \
+		name##Expr(int line,                                     \
+				   ASTNode *expr1,                               \
+				   ASTNode *expr2)                               \
+			: BinaryExpr(line,                                   \
+						 expr1,                                  \
+						 expr2) {}                               \
+		int get_precedence() const                               \
+		{                                                        \
+			return prec;                                         \
+		}                                                        \
+		std::string get_oper() const                             \
+		{                                                        \
+			return oper;                                         \
+		}                                                        \
+		TypeEnum infer_type(std::string context) const override; \
 	};
 
 enum class TypeEnum : unsigned int
@@ -34,6 +35,9 @@ enum class TypeEnum : unsigned int
 	Caracter = 3,
 	Arreglo = 4,
 	Tipo = 5,
+	ArregloDeEntero = 6,
+	ArregloDeBooleano = 7,
+	ArregloDeCaracter = 8,
 };
 
 enum class NodeEnum : unsigned int
@@ -41,6 +45,8 @@ enum class NodeEnum : unsigned int
 	ASTNodeList = 1,
 	StringNode = 2,
 	SubprogramDeclHeader = 3,
+	Expr = 4,
+	Type = 5,
 	Other = 255,
 };
 
@@ -178,6 +184,11 @@ class Type : public ASTNode
 		delete array_type;
 	}
 	std::string to_string() const override;
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::Type;
+	}
+	TypeEnum infer_type(std::string context) const;
 
   private:
 	TypeEnum type;
@@ -216,6 +227,10 @@ class Expr : public ASTNode
 	Expr(int line)
 		: ASTNode(line) {}
 	virtual std::string to_string() const = 0;
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::Expr;
+	}
 	std::string get_oper() const
 	{
 		return "";
@@ -224,6 +239,7 @@ class Expr : public ASTNode
 	{
 		return 255;
 	}
+	virtual TypeEnum infer_type(std::string context) const = 0;
 };
 
 class NumberNode : public Expr
@@ -236,6 +252,10 @@ class NumberNode : public Expr
 	std::string to_string() const override
 	{
 		return std::to_string(number);
+	}
+	TypeEnum infer_type(std::string context) const override
+	{
+		return TypeEnum::Entero;
 	}
 
   private:
@@ -428,6 +448,7 @@ class LeftValue : public Expr
 		delete index;
 	}
 	std::string to_string() const override;
+	TypeEnum infer_type(std::string context) const override;
 
   private:
 	ASTNode *id;
@@ -451,6 +472,15 @@ class BinaryExpr : public Expr
 	std::string to_string() const override;
 	virtual std::string get_oper() const = 0;
 	virtual int get_precedence() const = 0;
+	virtual TypeEnum infer_type(std::string context) const override = 0;
+	ASTNode *get_expr1() const
+	{
+		return expr1;
+	}
+	ASTNode *get_expr2() const
+	{
+		return expr2;
+	}
 
   private:
 	ASTNode *expr1;
@@ -484,6 +514,7 @@ class NegativeExpr : public Expr
 		delete expr;
 	}
 	std::string to_string() const override;
+	TypeEnum infer_type(std::string context) const override;
 
   private:
 	ASTNode *expr;
@@ -516,6 +547,10 @@ class CharacterLiteralNode : public Expr
 	{
 		return character_literal;
 	}
+	TypeEnum infer_type(std::string context) const override
+	{
+		return TypeEnum::Caracter;
+	}
 
   private:
 	std::string character_literal;
@@ -529,6 +564,10 @@ class BooleanNode : public Expr
 		: Expr(line),
 		  boolean(boolean) {}
 	std::string to_string() const override;
+	TypeEnum infer_type(std::string context) const override
+	{
+		return TypeEnum::Booleano;
+	}
 
   private:
 	bool boolean;
@@ -549,6 +588,7 @@ class SubprogramCall : public Expr
 		delete argument_list;
 	}
 	std::string to_string() const override;
+	TypeEnum infer_type(std::string context) const override;
 
   private:
 	ASTNode *id;
@@ -752,6 +792,7 @@ class NegateExpr : public Expr
 		delete expr;
 	}
 	std::string to_string() const override;
+	TypeEnum infer_type(std::string context) const override;
 
   private:
 	ASTNode *expr;
