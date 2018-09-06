@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 
 	// std::cout << program_node->to_string() << std::endl;
 	program_node->pre_syntax_analysis();
+	program_node->syntax_analysis();
 
 	delete program_node;
 	return 0;

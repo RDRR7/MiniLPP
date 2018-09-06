@@ -5,7 +5,7 @@
 #include <string>
 #include <list>
 
-#define GLOBAL_CONTEXT "GLOBAL_CONTEXT"
+#define GLOBAL_CONTEXT "MAIN"
 #define RETURN_TYPE "RETURN_TYPE"
 #define DEFINE_BINARY_EXPR(name, prec, oper)                     \
 	class name##Expr : public BinaryExpr                         \
@@ -47,6 +47,7 @@ enum class NodeEnum : unsigned int
 	SubprogramDeclHeader = 3,
 	Expr = 4,
 	Type = 5,
+	AssignStatement = 6,
 	Other = 255,
 };
 
@@ -66,6 +67,7 @@ class ASTNode
 		return line;
 	}
 	virtual void pre_syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
+	virtual void syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 
   private:
 	int line;
@@ -93,6 +95,7 @@ class ProgramNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *type_definition_section;
@@ -308,6 +311,7 @@ class SubprogramDeclList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void syntax_analysis(std::string context) override;
 };
 
 class SubprogramDecl : public ASTNode
@@ -329,6 +333,7 @@ class SubprogramDecl : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *header;
@@ -410,6 +415,7 @@ class StatementList : public ASTNodeList
 	StatementList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 };
 
 class AssignStatement : public ASTNode
@@ -427,6 +433,12 @@ class AssignStatement : public ASTNode
 		delete expr;
 	}
 	std::string to_string() const override;
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::AssignStatement;
+	}
+	void syntax_analysis(std::string context) override;
+	TypeEnum infer_type(std::string context) const;
 
   private:
 	ASTNode *lvalue;
@@ -588,6 +600,10 @@ class SubprogramCall : public Expr
 		delete argument_list;
 	}
 	std::string to_string() const override;
+	ASTNode *get_id()
+	{
+		return id;
+	}
 	TypeEnum infer_type(std::string context) const override;
 
   private:
@@ -615,6 +631,7 @@ class CallStatement : public ASTNode
 		delete call;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *call;
@@ -638,6 +655,7 @@ class IfStatement : public ASTNode
 		delete else_statement;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *expr;
@@ -657,6 +675,7 @@ class ElseStatement : public ASTNode
 		delete statement_list;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *statement_list;
@@ -677,6 +696,7 @@ class WhileStatement : public ASTNode
 		delete statement_list;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *expr;
@@ -701,6 +721,7 @@ class ForStatement : public ASTNode
 		delete statement_list;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *assign;
@@ -723,6 +744,7 @@ class NotDoWhileStatement : public ASTNode
 		delete statement_list;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *expr;
@@ -741,6 +763,7 @@ class ReturnNode : public ASTNode
 		delete expr;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *expr;
@@ -758,6 +781,7 @@ class WriteNode : public ASTNode
 		delete argument_list;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *argument_list;
@@ -775,6 +799,7 @@ class ReadNode : public ASTNode
 		delete expr;
 	}
 	std::string to_string() const override;
+	void syntax_analysis(std::string context) override;
 
   private:
 	ASTNode *expr;
