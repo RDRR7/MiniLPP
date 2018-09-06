@@ -36,8 +36,8 @@ enum class TypeEnum : unsigned int
 	Arreglo = 4,
 	Tipo = 5,
 	ArregloDeEntero = 6,
-	ArregloDeBooleano = 7,
-	ArregloDeCaracter = 8,
+	ArregloDeCaracter = 7,
+	ArregloDeBooleano = 8,
 };
 
 enum class NodeEnum : unsigned int

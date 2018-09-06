@@ -1131,9 +1131,12 @@ TypeEnum SubprogramCall::infer_type(std::string context) const
 					  << std::endl;
 			exit(1);
 		}
-		assert(functions_variables[id_str][RETURN_TYPE]->get_type() == NodeEnum::Type);
-		Type *type = static_cast<Type *>(functions_variables[id_str][RETURN_TYPE]);
-		return type->infer_type(context);
+		else
+		{
+			assert(functions_variables[id_str][RETURN_TYPE]->get_type() == NodeEnum::Type);
+			Type *type = static_cast<Type *>(functions_variables[id_str][RETURN_TYPE]);
+			return type->infer_type(context);
+		}
 	}
 }
 
@@ -1146,5 +1149,86 @@ TypeEnum NegateExpr::infer_type(std::string context) const
 
 TypeEnum Type::infer_type(std::string context) const
 {
-	return TypeEnum::Entero;
+	if (type == TypeEnum::Entero)
+	{
+		return type;
+	}
+	if (type == TypeEnum::Caracter)
+	{
+		return type;
+	}
+	if (type == TypeEnum::Booleano)
+	{
+		return type;
+	}
+	if (type == TypeEnum::Tipo)
+	{
+		assert(user_type->get_type() == NodeEnum::StringNode);
+		StringNode *string_node = static_cast<StringNode *>(user_type);
+		const std::string id_str = string_node->get_id();
+		if (type_definitions.find(id_str) == type_definitions.end())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' is undefined"
+					  << std::endl;
+			exit(1);
+		}
+		else
+		{
+			assert(type_definitions[id_str]->get_type() == NodeEnum::Type);
+			Type *type = static_cast<Type *>(type_definitions[id_str]);
+			return type->infer_type(context);
+		}
+	}
+	if (type == TypeEnum::Arreglo)
+	{
+		assert(array_type->get_type() == NodeEnum::Type);
+		Type *type = static_cast<Type *>(array_type);
+		switch (type->infer_type(context))
+		{
+		case TypeEnum::Entero:
+			return TypeEnum::ArregloDeEntero;
+		case TypeEnum::Caracter:
+			return TypeEnum::ArregloDeCaracter;
+		case TypeEnum::Booleano:
+			return TypeEnum::ArregloDeBooleano;
+		case TypeEnum::ArregloDeEntero:
+		case TypeEnum::ArregloDeCaracter:
+		case TypeEnum::ArregloDeBooleano:
+			std::cerr << "[line "
+					  << get_line()
+					  << "]<"
+					  << context
+					  << "> array of array is not supported"
+					  << std::endl;
+			exit(1);
+		case TypeEnum::Tipo:
+			assert(user_type->get_type() == NodeEnum::StringNode);
+			StringNode *string_node = static_cast<StringNode *>(user_type);
+			const std::string id_str = string_node->get_id();
+			if (type_definitions.find(id_str) == type_definitions.end())
+			{
+				std::cerr << "[line "
+						  << string_node->get_line()
+						  << "]<"
+						  << context
+						  << "> '"
+						  << id_str
+						  << "' is undefined"
+						  << std::endl;
+				exit(1);
+			}
+			else
+			{
+				assert(type_definitions[id_str]->get_type() == NodeEnum::Type);
+				Type *type = static_cast<Type *>(type_definitions[id_str]);
+				return type->infer_type(context);
+			}
+		}
+	}
 }
