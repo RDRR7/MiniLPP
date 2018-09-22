@@ -1536,8 +1536,18 @@ void ReturnNode::syntax_analysis(std::string context)
 
 void WriteNode::syntax_analysis(std::string context)
 {
-	// Should check variables exist
-	// Could have expressions and literals
+	assert(argument_list->get_type() == NodeEnum::ASTNodeList);
+	ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(argument_list);
+	auto argument_list_as_list = ast_node_list->get_ast_nodes();
+
+	for (auto argument : argument_list_as_list)
+	{
+		if (argument->get_type() == NodeEnum::Expr)
+		{
+			Expr *argument_as_expr = static_cast<Expr *>(argument);
+			argument_as_expr->infer_type(context);
+		}
+	}
 }
 
 void ReadNode::syntax_analysis(std::string context)
