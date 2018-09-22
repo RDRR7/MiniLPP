@@ -23,7 +23,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable (
 	mini_lpp.elf
-	ast/nodes.cpp
+	ast/nodes_to_string.cpp
+	ast/nodes_semantic_analysis.cpp
 	parser.cpp
 	lexer.cpp
 	main.cpp
