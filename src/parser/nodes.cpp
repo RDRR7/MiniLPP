@@ -446,9 +446,64 @@ void ASTNodeList::add_to_list(ASTNode *list, ASTNode *element)
 	ast_node_list->get_pointer_to_ast_nodes()->push_back(element);
 }
 
+void load_lpp_functions()
+{
+	functions_variables["limpiar_pantalla"];
+
+	functions_variables["posicionar_cursor"];
+	functions_parameters["posicionar_cursor"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+	functions_parameters["posicionar_cursor"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+
+	functions_variables["color_fondo"];
+	functions_parameters["color_fondo"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+
+	functions_variables["color_texto"];
+	functions_parameters["color_texto"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+
+	functions_variables["caracter_ascii"];
+	functions_parameters["caracter_ascii"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+	functions_variables["caracter_ascii"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Caracter, NULL, NULL, NULL);
+
+	functions_variables["valor_ascii"];
+	functions_parameters["valor_ascii"].push_back(
+		new Type(0, TypeEnum::Caracter, NULL, NULL, NULL));
+	functions_variables["valor_ascii"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL);
+
+	functions_variables["obtener_caracter"];
+	functions_variables["obtener_caracter"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Caracter, NULL, NULL, NULL);
+
+	functions_variables["obtener_tecla"];
+	functions_variables["obtener_tecla"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL);
+
+	functions_variables["nueva_linea"];
+
+	functions_variables["aleatorio"];
+	functions_variables["aleatorio"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL);
+
+	functions_variables["inicializar_aleatorio"];
+
+	functions_variables["tecla_presionada"];
+	functions_variables["tecla_presionada"][RETURN_TYPE] =
+		new Type(0, TypeEnum::Booleano, NULL, NULL, NULL);
+
+	functions_variables["pausa"];
+	functions_parameters["pausa"].push_back(
+		new Type(0, TypeEnum::Entero, NULL, NULL, NULL));
+}
+
 void ProgramNode::pre_syntax_analysis(std::string context)
 {
-	/*---- Should add LPP functions ----*/
+	load_lpp_functions();
 	if (type_definition_section != NULL)
 	{
 		type_definition_section->pre_syntax_analysis(context);
