@@ -7,6 +7,7 @@
 %{
 
 #include <fstream>
+#include <algorithm>
 #include "lexer.hpp"
 #include "parser.hpp"
 
@@ -53,8 +54,8 @@
 "falso"							return static_cast<int>(yytokentype::KW_FALSO);
 "no"							return static_cast<int>(yytokentype::KW_NO);
 
-\'.\' 							yylval = new StringLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
-\".*\" 							yylval = new CharacterLiteralNode(get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
+\'.\' 							yylval = new CharacterLiteralNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
+\".*\" 							yylval = new StringLiteralNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
 
 "+"								return static_cast<int>(Token::OP_ADD);
 "-"								return static_cast<int>(Token::OP_SUB);
@@ -77,8 +78,8 @@
 "//" 							BEGIN(LINE_COMMENT);
 "/*" 							BEGIN(BLOCK_COMMENT);
 
-[0-9]+							yylval = new NumberNode(std::stoi(get_lexeme())); return static_cast<int>(yytokentype::TK_NUMBER);
-[_a-z][_a-z0-9]*				yylval = new StringNode(get_lexeme()); return static_cast<int>(yytokentype::TK_ID);
+[0-9]+							yylval = new NumberNode(get_line(), std::stoi(get_lexeme())); return static_cast<int>(yytokentype::TK_NUMBER);
+[_a-z][_a-z0-9]*				yylval = new StringNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_ID);
 "<-"							return static_cast<int>(yytokentype::TK_ASSIGN);
 ">="							return static_cast<int>(yytokentype::TK_GToE);
 "<="							return static_cast<int>(yytokentype::TK_LToE);
@@ -98,7 +99,8 @@
 
 %%
 
-Lexer::Lexer(std::ifstream &in) : in(in)
+Lexer::Lexer(std::ifstream &in)
+	: in(in)
 {
 	yylex_init_extra(&in, &scanner);
 }
@@ -110,7 +112,9 @@ Lexer::~Lexer()
 
 std::string Lexer::get_lexeme() const
 {
-	return yyget_text(scanner);
+	std::string lexeme = yyget_text(scanner);
+	std::transform(lexeme.begin(), lexeme.end(), lexeme.begin(), ::tolower);
+	return lexeme;
 }
 
 int Lexer::get_line() const

@@ -22,7 +22,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable (
 	mini_lpp.elf
-	${PROJECT_SOURCE_DIR}/parser/nodes.cpp
+	parser/nodes.cpp
 	parser.cpp
 	lexer.cpp
 	main.cpp
