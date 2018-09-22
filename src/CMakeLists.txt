@@ -16,13 +16,14 @@ add_custom_command (
 	MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/lexer/lexer.l
 )
 
-include_directories (${PROJECT_SOURCE_DIR}/lexer)
+include_directories (${PROJECT_SOURCE_DIR}/ast)
 include_directories (${PROJECT_SOURCE_DIR}/parser)
+include_directories (${PROJECT_SOURCE_DIR}/lexer)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable (
 	mini_lpp.elf
-	parser/nodes.cpp
+	ast/nodes.cpp
 	parser.cpp
 	lexer.cpp
 	main.cpp
