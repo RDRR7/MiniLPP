@@ -1,9 +1,11 @@
 #include "nodes.hpp"
 #include <cassert>
 #include <unordered_map>
+#include <vector>
 
 std::unordered_map<std::string, ASTNode *> type_definitions;
 std::unordered_map<std::string, std::unordered_map<std::string, ASTNode *>> functions_variables;
+std::unordered_map<std::string, std::vector<ASTNode *>> functions_parameters;
 
 std::string ProgramNode::to_string() const
 {
@@ -605,6 +607,7 @@ void ArgumentDecl::pre_syntax_analysis(std::string context)
 	else
 	{
 		functions_variables[context][id_str] = type;
+		functions_parameters[context].push_back(type);
 	}
 }
 
@@ -1106,7 +1109,6 @@ TypeEnum NegativeExpr::infer_type(std::string context) const
 
 TypeEnum SubprogramCall::infer_type(std::string context) const
 {
-	/*---- Should check arguments ----*/
 	assert(id->get_type() == NodeEnum::StringNode);
 	StringNode *string_node = static_cast<StringNode *>(id);
 	const std::string id_str = string_node->get_id();
@@ -1138,6 +1140,8 @@ TypeEnum SubprogramCall::infer_type(std::string context) const
 		}
 		else
 		{
+			check_arguments(context);
+
 			assert(functions_variables[id_str][RETURN_TYPE]->get_type() == NodeEnum::Type);
 			Type *type = static_cast<Type *>(functions_variables[id_str][RETURN_TYPE]);
 			return type->infer_type(context);
@@ -1343,7 +1347,8 @@ void CallStatement::syntax_analysis(std::string context)
 					  << std::endl;
 			exit(1);
 		}
-		/*---- Check arguments ----*/
+
+		call_as_subprogram_call->check_arguments(context);
 	}
 	if (call->get_type() == NodeEnum::StringNode)
 	{
@@ -1362,7 +1367,21 @@ void CallStatement::syntax_analysis(std::string context)
 					  << std::endl;
 			exit(1);
 		}
-		/*---- Check that it doesn't need arguments ----*/
+
+		if (!functions_parameters[id_str].empty())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' expected "
+					  << functions_parameters[id_str].size()
+					  << " arguments, but got 0"
+					  << std::endl;
+			exit(1);
+		}
 	}
 }
 
@@ -1526,4 +1545,80 @@ void ReadNode::syntax_analysis(std::string context)
 	assert(expr->get_type() == NodeEnum::Expr);
 	Expr *expr_as_expr = static_cast<Expr *>(expr);
 	expr_as_expr->infer_type(context);
+}
+
+void SubprogramCall::check_arguments(std::string context) const
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+
+	if (argument_list != NULL)
+	{
+		assert(argument_list->get_type() == NodeEnum::ASTNodeList);
+		ASTNodeList *ast_node_list = static_cast<ASTNodeList *>(argument_list);
+		auto argument_list_as_list = ast_node_list->get_ast_nodes();
+
+		int i = 0;
+		for (auto argument : argument_list_as_list)
+		{
+			assert(argument->get_type() == NodeEnum::Expr);
+			Expr *argument_as_expr = static_cast<Expr *>(argument);
+
+			if (i >= functions_parameters[id_str].size())
+			{
+				break;
+			}
+			assert(functions_parameters[id_str].at(i)->get_type() == NodeEnum::Type);
+			Type *parameter_as_type = static_cast<Type *>(functions_parameters[id_str].at(i++));
+
+			if (argument_as_expr->infer_type(context) != parameter_as_type->infer_type(id_str))
+			{
+				std::cerr << "[line "
+						  << string_node->get_line()
+						  << "]<"
+						  << context
+						  << "> '"
+						  << id_str
+						  << "' argument "
+						  << i
+						  << ", incompatible type"
+						  << std::endl;
+				exit(1);
+			}
+		}
+
+		if (argument_list_as_list.size() != functions_parameters[id_str].size())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' expected "
+					  << functions_parameters[id_str].size()
+					  << " arguments, but got "
+					  << argument_list_as_list.size()
+					  << std::endl;
+			exit(1);
+		}
+	}
+	else
+	{
+		if (!functions_parameters[id_str].empty())
+		{
+			std::cerr << "[line "
+					  << string_node->get_line()
+					  << "]<"
+					  << context
+					  << "> '"
+					  << id_str
+					  << "' expected "
+					  << functions_parameters[id_str].size()
+					  << " arguments, but got 0"
+					  << std::endl;
+			exit(1);
+		}
+	}
 }

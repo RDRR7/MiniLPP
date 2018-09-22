@@ -605,6 +605,7 @@ class SubprogramCall : public Expr
 		return id;
 	}
 	TypeEnum infer_type(std::string context) const override;
+	void check_arguments(std::string context) const;
 
   private:
 	ASTNode *id;
