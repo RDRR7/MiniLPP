@@ -51,7 +51,7 @@ void posicionar_cursor(int line, int column)
 
 void color_fondo(int color)
 {
-	if (color >= 16)
+	while (color >= 16)
 	{
 		color -= 16;
 	}
@@ -63,7 +63,7 @@ void color_fondo(int color)
 
 void color_texto(int color)
 {
-	if (color >= 16)
+	while (color >= 16)
 	{
 		color -= 16;
 	}
@@ -135,4 +135,40 @@ bool read_bool()
 	char *boolean = new char[13];
 	getnstr(boolean, 12);
 	return atoi(boolean) == 1;
+}
+
+void print(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	int index = 0;
+	while (fmt[index] != '\0')
+	{
+		if (fmt[index] == '%' && fmt[index + 1] == 'd')
+		{
+			int i = va_arg(args, int);
+			printw("%d", i);
+			index++;
+		}
+		else if (fmt[index] == '%' && fmt[index + 1] == 'c')
+		{
+			int c = va_arg(args, int);
+			printw("%c", (char)c);
+			index++;
+		}
+		else if (fmt[index] == '%' && fmt[index + 1] == 'd')
+		{
+			int b = va_arg(args, int);
+			printw("%d", (bool)b);
+			index++;
+		}
+		else
+		{
+			printw("%c", fmt[index]);
+		}
+		index++;
+	}
+
+	va_end(args);
 }

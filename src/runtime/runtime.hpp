@@ -16,3 +16,4 @@ extern "C" void pausa(int milliseconds);
 extern "C" int read_int();
 extern "C" char read_char();
 extern "C" bool read_bool();
+extern "C" void print(const char *fmt, ...);
