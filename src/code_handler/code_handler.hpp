@@ -11,7 +11,14 @@
 class CodeHandler
 {
   public:
-	CodeHandler() : label_count(0), string_literal_count(0), character_literal_count(0) {}
+	CodeHandler()
+		: label_count(0),
+		  string_literal_count(0),
+		  character_literal_count(0),
+		  temp_count(0)
+	{
+		current_context = NULL;
+	}
 	~CodeHandler()
 	{
 		auto it = functions.begin();
@@ -34,6 +41,7 @@ class CodeHandler
 	std::string get_character_literal_place(std::string value);
 	std::string get_constant_place(int value);
 	std::string new_temp();
+	void print_all();
 
   private:
 	int label_count;

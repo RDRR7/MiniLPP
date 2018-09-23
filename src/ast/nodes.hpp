@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include "code_handler.hpp"
 
 #define GLOBAL_CONTEXT "MAIN"
 #define RETURN_TYPE "RETURN_TYPE"
@@ -68,6 +69,7 @@ class ASTNode
 	}
 	virtual void pre_syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 	virtual void syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
+	virtual void load_functions(CodeHandler &code_handler) {}
 
   private:
 	int line;
@@ -96,6 +98,7 @@ class ProgramNode : public ASTNode
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *type_definition_section;
@@ -272,6 +275,7 @@ class VariableSectionList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class VariableSection : public ASTNode
@@ -290,6 +294,7 @@ class VariableSection : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *ids;
@@ -302,6 +307,7 @@ class IdList : public ASTNodeList
 	IdList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class SubprogramDeclList : public ASTNodeList
@@ -312,6 +318,7 @@ class SubprogramDeclList : public ASTNodeList
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class SubprogramDecl : public ASTNode
@@ -334,6 +341,7 @@ class SubprogramDecl : public ASTNode
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *header;
@@ -368,6 +376,7 @@ class SubprogramDeclHeader : public ASTNode
 		return id;
 	}
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -382,6 +391,7 @@ class ArgumentDeclList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class ArgumentDecl : public ASTNode
@@ -402,6 +412,7 @@ class ArgumentDecl : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *type;

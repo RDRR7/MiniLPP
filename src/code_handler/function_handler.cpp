@@ -1,4 +1,5 @@
 #include "function_handler.hpp"
+#include <iostream>
 
 std::string FunctionHandler::new_parameter()
 {
@@ -39,5 +40,23 @@ std::string FunctionHandler::get_variable_place(std::string name)
 	else
 	{
 		"";
+	}
+}
+
+void FunctionHandler::print_all()
+{
+	std::cout << "\tparameter_offset " << parameter_offset << std::endl;
+	std::cout << "\tvariable_offset " << variable_offset << std::endl;
+
+	std::cout << "---- Parameters ----" << std::endl;
+	for (auto parameter : parameters)
+	{
+		std::cout << parameter.first << " " << parameter.second << std::endl;
+	}
+
+	std::cout << "---- Variables ----" << std::endl;
+	for (auto variable : variables)
+	{
+		std::cout << variable.first << " " << variable.second << std::endl;
 	}
 }

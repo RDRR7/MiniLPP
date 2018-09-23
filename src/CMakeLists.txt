@@ -26,6 +26,7 @@ add_executable (
 	mini_lpp.elf
 	ast/nodes_to_string.cpp
 	ast/nodes_semantic_analysis.cpp
+	ast/nodes_generate_code.cpp
 	parser.cpp
 	lexer.cpp
 	code_handler/function_handler.cpp

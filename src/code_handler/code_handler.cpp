@@ -1,6 +1,7 @@
 #include "code_handler.hpp"
 #include <sstream>
 #include <cassert>
+#include <iostream>
 
 std::string CodeHandler::new_string_literal()
 {
@@ -130,4 +131,38 @@ std::string CodeHandler::new_temp()
 	std::ostringstream ss;
 	ss << "temp" << temp_count++;
 	return ss.str();
+}
+
+void CodeHandler::print_all()
+{
+	std::cout << "label_count " << label_count << std::endl;
+	std::cout << "string_literal_count " << string_literal_count << std::endl;
+	std::cout << "character_literal_count " << character_literal_count << std::endl;
+	std::cout << "constants_count " << constants_count << std::endl;
+	std::cout << "temp_count " << temp_count << std::endl;
+
+	std::cout << "---- Variables ----" << std::endl;
+	for (auto variable : variables)
+	{
+		std::cout << variable << std::endl;
+	}
+
+	std::cout << "---- Literals ----" << std::endl;
+	for (auto literal : literals)
+	{
+		std::cout << literal.first << " " << literal.second << std::endl;
+	}
+
+	std::cout << "---- Constants ----" << std::endl;
+	for (auto constant : constants)
+	{
+		std::cout << constant.first << " " << constant.second << std::endl;
+	}
+
+	std::cout << "---- Functions ----" << std::endl;
+	for (auto function : functions)
+	{
+		std::cout << function.first << std::endl;
+		function.second->print_all();
+	}
 }
