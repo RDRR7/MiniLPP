@@ -33,3 +33,12 @@ add_executable (
 	code_handler/code_handler.cpp
 	main.cpp
 )
+
+add_custom_command (
+	OUTPUT liblppf.so
+	COMMAND g++ -std=c++11 -m32 -fPIC ${PROJECT_SOURCE_DIR}/runtime/runtime.cpp -shared -o liblppf.so -lncurses
+	DEPENDS ${PROJECT_SOURCE_DIR}/runtime/runtime.hpp
+	MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/runtime/runtime.cpp
+)
+
+add_custom_target(compile_runtime DEPENDS liblppf.so)

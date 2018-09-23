@@ -1,0 +1,18 @@
+extern "C" void init_screen();
+extern "C" void end_screen();
+extern "C" void limpiar_pantalla();
+extern "C" void posicionar_cursor(int line, int column);
+extern "C" void color_fondo(int color);
+extern "C" void color_texto(int color);
+extern "C" char caracter_ascii(int ascii_value);
+extern "C" int valor_ascii(char character);
+extern "C" char obtener_caracter();
+extern "C" int obtener_tecla();
+extern "C" void nueva_linea();
+extern "C" int aleatorio();
+extern "C" void inicializar_aleatorio();
+extern "C" bool tecla_presionada();
+extern "C" void pausa(int milliseconds);
+extern "C" int read_int();
+extern "C" char read_char();
+extern "C" bool read_bool();
