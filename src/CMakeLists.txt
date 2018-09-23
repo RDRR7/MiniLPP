@@ -19,6 +19,7 @@ add_custom_command (
 include_directories (${PROJECT_SOURCE_DIR}/ast)
 include_directories (${PROJECT_SOURCE_DIR}/parser)
 include_directories (${PROJECT_SOURCE_DIR}/lexer)
+include_directories (${PROJECT_SOURCE_DIR}/code_handler)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable (
@@ -27,5 +28,7 @@ add_executable (
 	ast/nodes_semantic_analysis.cpp
 	parser.cpp
 	lexer.cpp
+	code_handler/function_handler.cpp
+	code_handler/code_handler.cpp
 	main.cpp
 )
