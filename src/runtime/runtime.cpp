@@ -2,6 +2,7 @@
 #include <ncurses.h>
 #include <unordered_map>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <chrono>
 #include <thread>
@@ -46,7 +47,7 @@ void limpiar_pantalla()
 
 void posicionar_cursor(int line, int column)
 {
-	move(column, line);
+	move(line, column);
 }
 
 void color_fondo(int color)
@@ -120,8 +121,15 @@ void pausa(int milliseconds)
 
 int read_int()
 {
+	int line, column;
+	getyx(stdscr, line, column);
+
 	char *number = new char[11];
 	getnstr(number, 10);
+
+	int len = strlen(number);
+	move(line, column + len);
+
 	return atoi(number);
 }
 
@@ -132,8 +140,15 @@ char read_char()
 
 bool read_bool()
 {
+	int line, column;
+	getyx(stdscr, line, column);
+
 	char *boolean = new char[13];
 	getnstr(boolean, 12);
+
+	int len = strlen(boolean);
+	move(line, column + len);
+
 	return atoi(boolean) == 1;
 }
 
