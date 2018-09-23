@@ -6,6 +6,8 @@
 #include <string>
 #include "function_handler.hpp"
 
+#define GLOBAL_CONTEXT "MAIN"
+
 class CodeHandler
 {
   public:
@@ -20,12 +22,13 @@ class CodeHandler
 		}
 	}
 	std::string new_label();
-	FunctionHandler *new_function(std::string name);
+	void new_function(std::string name);
 	void change_context(std::string name);
 	void register_variable(std::string name);
 	void register_string_literal(std::string value);
 	void register_character_literal(std::string value);
 	void register_constant(int value);
+	void register_function_parameter(std::string name);
 	std::string get_variable_place(std::string name);
 	std::string get_string_literal_place(std::string value);
 	std::string get_character_literal_place(std::string value);

@@ -26,12 +26,18 @@ void FunctionHandler::register_variable(std::string name)
 	variables[name] = new_variable();
 }
 
-std::string FunctionHandler::get_paramter_place(std::string name)
-{
-	return parameters[name];
-}
-
 std::string FunctionHandler::get_variable_place(std::string name)
 {
-	return variables[name];
+	if (variables.find(name) != variables.end())
+	{
+		return variables[name];
+	}
+	else if (parameters.find(name) != parameters.end())
+	{
+		return parameters[name];
+	}
+	else
+	{
+		"";
+	}
 }

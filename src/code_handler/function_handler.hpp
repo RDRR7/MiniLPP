@@ -12,7 +12,6 @@ class FunctionHandler
 	~FunctionHandler() {}
 	void register_parameter(std::string name);
 	void register_variable(std::string name);
-	std::string get_paramter_place(std::string name);
 	std::string get_variable_place(std::string name);
 
   private:

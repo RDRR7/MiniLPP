@@ -1,5 +1,6 @@
 #include "code_handler.hpp"
 #include <sstream>
+#include <cassert>
 
 std::string CodeHandler::new_string_literal()
 {
@@ -29,21 +30,34 @@ std::string CodeHandler::new_label()
 	return ss.str();
 }
 
-FunctionHandler *CodeHandler::new_function(std::string name)
+void CodeHandler::new_function(std::string name)
 {
 	FunctionHandler *function = new FunctionHandler();
 	functions[name] = function;
-	return function;
 }
 
 void CodeHandler::change_context(std::string name)
 {
-	current_context = functions[name];
+	if (name.compare(GLOBAL_CONTEXT) == 0)
+	{
+		current_context = NULL;
+	}
+	else
+	{
+		current_context = functions[name];
+	}
 }
 
 void CodeHandler::register_variable(std::string name)
 {
-	variables.insert(name);
+	if (current_context == NULL)
+	{
+		variables.insert(name);
+	}
+	else
+	{
+		current_context->register_variable(name);
+	}
 }
 
 void CodeHandler::register_string_literal(std::string value)
@@ -70,9 +84,30 @@ void CodeHandler::register_constant(int value)
 	}
 }
 
+void CodeHandler::register_function_parameter(std::string name)
+{
+	assert(current_context != NULL);
+	current_context->register_parameter(name);
+}
+
 std::string CodeHandler::get_variable_place(std::string name)
 {
-	return name;
+	if (current_context == NULL)
+	{
+		return name;
+	}
+	else
+	{
+		std::string place = current_context->get_variable_place(name);
+		if (place.empty())
+		{
+			return name;
+		}
+		else
+		{
+			return place;
+		}
+	}
 }
 
 std::string CodeHandler::get_string_literal_place(std::string value)
