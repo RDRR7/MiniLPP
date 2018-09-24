@@ -177,11 +177,11 @@ void print(const char *fmt, ...)
 			int b = va_arg(args, int);
 			if (b)
 			{
-				printw("%s", "VERDADERO");
+				printw("%s", "verdadero");
 			}
 			else
 			{
-				printw("%s", "FALSO");
+				printw("%s", "falso");
 			}
 			index++;
 		}

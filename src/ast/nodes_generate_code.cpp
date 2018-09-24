@@ -302,3 +302,79 @@ void ReadNode::generate_code(CodeHandler &code_handler)
 
 	set_code(ss.str());
 }
+
+void IfStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	expr->generate_code(code_handler);
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+	}
+	if (else_statement != NULL)
+	{
+		else_statement->generate_code(code_handler);
+	}
+
+	std::string else_label = code_handler.new_label();
+	std::string endif_label = code_handler.new_label();
+
+	ss << expr->get_code()
+	   << "cmp dword [" << expr->get_place() << "], 0\n"
+	   << "je " << else_label << "\n";
+
+	if (statement_list != NULL)
+	{
+		ss << statement_list->get_code();
+	}
+
+	ss << "jmp " << endif_label << "\n"
+	   << else_label << ":\n";
+
+	if (else_statement != NULL)
+	{
+		ss << else_statement->get_code();
+	}
+	ss << endif_label << ":\n";
+
+	set_code(ss.str());
+}
+
+void ElseStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+		ss << statement_list->get_code();
+	}
+	set_code(ss.str());
+}
+
+void WhileStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	expr->generate_code(code_handler);
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+	}
+
+	std::string loop_label = code_handler.new_label();
+	std::string end_loop_label = code_handler.new_label();
+
+	ss << loop_label << ":\n"
+	   << expr->get_code()
+	   << "cmp dword [" << expr->get_place() << "], 0\n"
+	   << "je " << end_loop_label << "\n";
+
+	if (statement_list != NULL)
+	{
+		ss << statement_list->get_code();
+	}
+
+	ss << "jmp " << loop_label << "\n"
+	   << end_loop_label << ":\n";
+
+	set_code(ss.str());
+}

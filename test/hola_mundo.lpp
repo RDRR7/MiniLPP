@@ -1,5 +1,12 @@
 booleano x
 inicio
-	lea x
-	escriba "Hola mundo", '!', 10, x
+	x<-verdadero
+	mientras x haga
+		lea x
+		si x entonces
+			escriba "Hola mundo", '!', 10, x
+		sino
+			escriba "Falso"
+		fin si
+	fin mientras
 fin

@@ -708,6 +708,7 @@ class IfStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -728,6 +729,7 @@ class ElseStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *statement_list;
@@ -749,6 +751,7 @@ class WhileStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
