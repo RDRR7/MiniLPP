@@ -172,10 +172,17 @@ void print(const char *fmt, ...)
 			printw("%c", (char)c);
 			index++;
 		}
-		else if (fmt[index] == '%' && fmt[index + 1] == 'd')
+		else if (fmt[index] == '%' && fmt[index + 1] == 'b')
 		{
 			int b = va_arg(args, int);
-			printw("%d", (bool)b);
+			if (b)
+			{
+				printw("%s", "VERDADERO");
+			}
+			else
+			{
+				printw("%s", "FALSO");
+			}
 			index++;
 		}
 		else if (fmt[index] == '%' && fmt[index + 1] == 's')
