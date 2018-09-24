@@ -61,12 +61,13 @@ void CodeHandler::register_variable(std::string name)
 	}
 }
 
-void CodeHandler::register_string_literal(std::string value)
+std::string CodeHandler::register_string_literal(std::string value)
 {
 	if (literals.find(value) == literals.end())
 	{
 		literals[value] = new_string_literal();
 	}
+	return literals[value];
 }
 
 void CodeHandler::register_character_literal(std::string value)
@@ -165,4 +166,26 @@ void CodeHandler::print_all()
 		std::cout << function.first << std::endl;
 		function.second->print_all();
 	}
+}
+
+std::string CodeHandler::get_code()
+{
+	std::ostringstream ss;
+
+	for (auto variable : variables)
+	{
+		ss << variable << "\tdd\t0x00\n";
+	}
+
+	for (auto literal : literals)
+	{
+		ss << literal.second << "\tdb\t" << literal.first << ", 0\n";
+	}
+
+	for (auto constant : constants)
+	{
+		ss << constant.second << "\t\tdb\t" << constant.first << "\n";
+	}
+
+	return ss.str();
 }

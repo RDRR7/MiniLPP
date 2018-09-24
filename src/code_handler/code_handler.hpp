@@ -15,6 +15,7 @@ class CodeHandler
 		: label_count(0),
 		  string_literal_count(0),
 		  character_literal_count(0),
+		  constants_count(0),
 		  temp_count(0)
 	{
 		current_context = NULL;
@@ -32,7 +33,7 @@ class CodeHandler
 	void new_function(std::string name);
 	void change_context(std::string name);
 	void register_variable(std::string name);
-	void register_string_literal(std::string value);
+	std::string register_string_literal(std::string value);
 	void register_character_literal(std::string value);
 	void register_constant(int value);
 	void register_function_parameter(std::string name);
@@ -42,6 +43,7 @@ class CodeHandler
 	std::string get_constant_place(int value);
 	std::string new_temp();
 	void print_all();
+	std::string get_code();
 
   private:
 	int label_count;
