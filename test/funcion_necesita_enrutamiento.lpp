@@ -1,0 +1,107 @@
+/*
+    Este programa fue traido a ustedes gracias al gentil patrocinnio de
+    * Derick
+    * Noel
+    * Arzu
+    * Morales
+*/
+
+/*
+    *  Debe ingresar:
+    -> Dos direcciones IPv4 (la de origen con la mascara de subred)
+    *  Ejemplo:
+        Arreglo [5] de Entero origen
+        Arreglo [4] de Entero destino
+        Booleano _necesitaEntrutamiento
+        Inicio
+            origen[1] <- 192
+            origen[2] <- 168
+            origen[3] <- 4
+            origen[4] <- 45
+            origen[5] <- 24
+            destino[1] <- 192
+            destino[2] <- 168
+            destino[3] <- 7
+            destino[4] <- 21
+            _necesitaEntrutamiento <- necesitaEntrutamiento(origen, destino)
+        Fin
+*/
+
+Arreglo [5] de Entero origen
+Arreglo [4] de Entero destino
+Booleano _necesitaEnrutamiento
+Entero i
+
+Funcion necesitaEnrutamiento (Arreglo [5] de Entero origen, Arreglo [4] de Entero destino) : Booleano
+Arreglo[4] de Entero mascara
+Arreglo[5] de Entero idRed
+Arreglo[4] de Entero broadcast
+Booleano retorno
+Entero octetosCompletos, conteo, octetoRestante, indice, potencia
+Inicio
+    octetosCompletos <- origen[5] div 8
+    Para indice <- 1 Hasta octetosCompletos Haga
+        mascara[indice] <- 255
+    Fin Para
+    conteo <- valorAbsoluto(8*octetosCompletos - origen[5])
+    potencia <- 7
+    octetoRestante <- 0
+    Para indice <- 1 Hasta conteo Haga
+        octetoRestante <- octetoRestante + 2^potencia
+        potencia <- potencia - 1
+    Fin Para
+    Si octetosCompletos + 1 <= 4 Entonces
+    	mascara[octetosCompletos + 1] <- octetoRestante
+    Fin Si
+    Si octetosCompletos + 2 <= 4 Entonces
+    	Para indice <- octetosCompletos + 2 Hasta 4 Haga
+    		mascara[indice] <- 0
+    	Fin Para
+    Fin Si
+    Escriba "Mascara de subred origen: ", mascara[1], ".", mascara[2], ".", mascara[3], ".", mascara[4], " = ", origen[5]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	idRed[indice] <- mascara[indice] y origen[indice]
+    Fin Para
+    idRed[5] <- origen[5]
+    Escriba "ID de red: ", idRed[1], ".", idRed[2], ".", idRed[3], ".", idRed[4], " / ", idRed[5]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	broadcast[indice] <- idRed[indice] o (255 - mascara[indice])
+    Fin Para
+    Escriba "Broadast: ", broadcast[1], ".", broadcast[2], ".", broadcast[3], ".", broadcast[4]
+    Llamar nueva_linea
+    Para indice <- 1 Hasta 4 Haga
+    	Si ((destino[indice] < idRed[indice]) o (destino[indice] > broadcast[indice])) Entonces
+    		Retorne Verdadero
+		Fin Si
+	Fin Para
+    Retorne Falso
+Fin
+
+Funcion valorAbsoluto(Entero n) : Entero
+Inicio
+    Si n < 1 Entonces
+        Retorne n*-1
+    Fin Si
+    Retorne n
+Fin
+
+Inicio
+    origen[1] <- 192
+    origen[2] <- 168
+    origen[3] <- 4
+    origen[4] <- 45
+    origen[5] <- 15
+    destino[1] <- 192
+    destino[2] <- 170
+    destino[3] <- 255
+    destino[4] <- 255
+    _necesitaEnrutamiento <- necesitaEnrutamiento(origen, destino)
+    Escriba "Necesita enrutamiento "
+    Si _necesitaEnrutamiento = Verdadero Entonces
+    	Escriba "Si"
+    Sino
+    	Escriba "No"
+    Fin Si
+Fin

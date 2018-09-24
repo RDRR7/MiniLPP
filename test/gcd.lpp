@@ -1,0 +1,27 @@
+Entero a, b
+Entero x, _y, z
+
+// Funcion que calcula el maximo comun divisor
+Funcion gcd(Entero a, Entero b): Entero
+Inicio
+    Si b = 0 Entonces
+        Retorne a
+    Sino
+        Retorne gcd(b, a mod b)
+    Fin Si
+Fin
+
+Inicio
+    a <- 10
+    b <- 20
+    Escriba "Introduzca un numero: "
+    Lea x
+    Escriba "Introduzca otro numero: "
+    Lea _y
+    
+    z <- gcd(x, _y)
+    
+    Escriba "El maximo comun divisor es ", z
+
+    Escriba z
+Fin

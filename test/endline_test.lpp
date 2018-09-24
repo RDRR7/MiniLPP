@@ -1,0 +1,55 @@
+Entero x
+Entero e
+
+Procedimiento pp 
+
+
+
+Inicio
+Fin
+
+Funcion x : Entero
+
+Inicio
+
+Fin
+
+
+
+
+Funcion p : Entero
+
+Inicio
+
+Fin
+
+
+Inicio Escriba "Hello"
+Si 1 < 8 
+Entonces
+Sino Fin Si
+
+Escriba " Perro"
+
+
+Mientras 1 < 4 Haga Escriba "Hola"
+
+
+
+Fin Mientras
+
+
+Para x <-0 Hasta 56 Haga 
+
+
+
+Escriba "Hola"
+
+Escriba "Adios"
+
+Fin Para
+
+Repita
+Escriba "P" 
+Hasta 1 < 5
+Fin
