@@ -35,6 +35,10 @@ int main(int argc, char *argv[])
 	program_node->load_functions(code_handler);
 	// code_handler.print_all();
 
+	program_node->generate_code(code_handler);
+	// code_handler.print_all();
+	std::cout << program_node->get_code() << std::endl;
+
 	delete program_node;
 	return 0;
 }

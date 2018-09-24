@@ -49,6 +49,7 @@ enum class NodeEnum : unsigned int
 	Expr = 4,
 	Type = 5,
 	AssignStatement = 6,
+	StringLiteral = 7,
 	Other = 255,
 };
 
@@ -56,7 +57,11 @@ class ASTNode
 {
   public:
 	ASTNode(int line)
-		: line(line) {}
+		: line(line)
+	{
+		code = "";
+		place = "";
+	}
 	virtual ~ASTNode() {}
 	virtual std::string to_string() const = 0;
 	virtual NodeEnum get_type() const
@@ -70,9 +75,28 @@ class ASTNode
 	virtual void pre_syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 	virtual void syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 	virtual void load_functions(CodeHandler &code_handler) {}
+	std::string get_code()
+	{
+		return code;
+	}
+	std::string get_place()
+	{
+		return place;
+	}
+	void set_code(std::string code)
+	{
+		this->code = code;
+	}
+	void set_place(std::string place)
+	{
+		this->place = place;
+	}
+	virtual void generate_code(CodeHandler &code_handler) {}
 
   private:
 	int line;
+	std::string code;
+	std::string place;
 };
 
 class ProgramNode : public ASTNode
@@ -99,6 +123,7 @@ class ProgramNode : public ASTNode
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
 	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *type_definition_section;
@@ -427,6 +452,7 @@ class StatementList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class AssignStatement : public ASTNode
@@ -554,6 +580,11 @@ class StringLiteralNode : public ASTNode
 	{
 		return string_literal;
 	}
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::StringLiteral;
+	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string string_literal;
@@ -794,6 +825,7 @@ class WriteNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *argument_list;

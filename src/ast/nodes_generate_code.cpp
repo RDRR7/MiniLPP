@@ -1,5 +1,6 @@
 #include "nodes.hpp"
 #include <cassert>
+#include <sstream>
 
 /*--------------- Load functions ---------------*/
 
@@ -100,3 +101,113 @@ void ArgumentDecl::load_functions(CodeHandler &code_handler)
 }
 
 /*--------------- Generate code ---------------*/
+
+void ProgramNode::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ss << "extern init_screen\n"
+	   << "extern end_screen\n"
+	   << "extern limpiar_pantalla\n"
+	   << "extern posicionar_cursor\n"
+	   << "extern color_fondo\n"
+	   << "extern color_texto\n"
+	   << "extern caracter_ascii\n"
+	   << "extern valor_ascii\n"
+	   << "extern obtener_caracter\n"
+	   << "extern obtener_tecla\n"
+	   << "extern nueva_linea\n"
+	   << "extern aleatorio\n"
+	   << "extern inicializar_aleatorio\n"
+	   << "extern tecla_presionada\n"
+	   << "extern pausa\n"
+	   << "extern read_int\n"
+	   << "extern read_char\n"
+	   << "extern read_bool\n"
+	   << "extern print\n"
+	   << "global main\n";
+
+	std::ostringstream ss_subprogram_decl;
+	if (subprogram_decl != NULL)
+	{
+		subprogram_decl->generate_code(code_handler);
+		ss_subprogram_decl << subprogram_decl->get_code();
+	}
+
+	std::ostringstream ss_statement_list;
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+		ss_statement_list << statement_list->get_code();
+	}
+
+	ss << "\nsection .data\n"
+	   << code_handler.get_code();
+
+	ss << "\nsection .text\n"
+	   << ss_subprogram_decl.str();
+
+	ss << "\nmain:\n"
+	   << "call init_screen\n"
+	   << ss_statement_list.str()
+	   << "call obtener_tecla\n"
+	   << "call end_screen\n"
+	   << "mov eax, 0\n"
+	   << "ret";
+
+	set_code(ss.str());
+}
+
+void StatementList::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	auto statements = get_ast_nodes();
+	for (auto statement : statements)
+	{
+		statement->generate_code(code_handler);
+		ss << statement->get_code();
+	}
+	set_code(ss.str());
+}
+
+void WriteNode::generate_code(CodeHandler &code_handler) // work in progress
+{
+	std::ostringstream ss;
+	std::ostringstream fmt;
+	size_t argsize = 0;
+
+	std::list<std::string> argscode;
+	fmt << "\"";
+
+	assert(argument_list->get_type() == NodeEnum::ASTNodeList);
+	ASTNodeList *argument_list_as_ast_node_list = static_cast<ASTNodeList *>(argument_list);
+	auto argument_list_as_list = argument_list_as_ast_node_list->get_ast_nodes();
+	for (auto argument : argument_list_as_list)
+	{
+		argument->generate_code(code_handler);
+		if (argument->get_type() == NodeEnum::StringLiteral)
+		{
+			fmt << "%s";
+			argscode.push_front("push " + argument->get_place());
+		}
+		ss << argument->get_code();
+		argsize += 4;
+	}
+	fmt << "\"";
+
+	for (const auto &s : argscode)
+	{
+		ss << s << '\n';
+	}
+
+	std::string fmt_place = code_handler.register_string_literal(fmt.str());
+	ss << "push " << fmt_place << "\n"
+	   << "call print\n"
+	   << "add esp, " << (argsize + 4) << "\n";
+
+	set_code(ss.str());
+}
+
+void StringLiteralNode::generate_code(CodeHandler &code_handler)
+{
+	set_place(code_handler.register_string_literal(string_literal));
+}
