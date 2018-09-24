@@ -21,6 +21,14 @@ class FunctionHandler
 	{
 		return name;
 	}
+	int get_variable_offset()
+	{
+		return (variable_offset + 4) * -1;
+	}
+	int get_parameter_offset()
+	{
+		return parameter_offset - 8;
+	}
 
   private:
 	std::string name;

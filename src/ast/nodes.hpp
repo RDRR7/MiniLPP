@@ -351,6 +351,7 @@ class SubprogramDeclList : public ASTNodeList
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
 	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class SubprogramDecl : public ASTNode
@@ -374,6 +375,7 @@ class SubprogramDecl : public ASTNode
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
 	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *header;
@@ -409,6 +411,7 @@ class SubprogramDeclHeader : public ASTNode
 	}
 	void pre_syntax_analysis(std::string context) override;
 	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -674,6 +677,7 @@ class ArgumentList : public ASTNodeList
 	ArgumentList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class CallStatement : public ASTNode
@@ -689,6 +693,7 @@ class CallStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *call;

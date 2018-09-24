@@ -106,7 +106,7 @@ std::string CodeHandler::get_variable_place(std::string name)
 	else
 	{
 		std::string place = current_context->get_variable_place(name);
-		if (place.empty())
+		if (place.compare("") == 0)
 		{
 			return name;
 		}
@@ -209,5 +209,29 @@ std::string CodeHandler::get_context_name()
 	else
 	{
 		return current_context->get_name();
+	}
+}
+
+int CodeHandler::get_context_variable_offset()
+{
+	if (current_context == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+		return current_context->get_variable_offset();
+	}
+}
+
+int CodeHandler::get_context_parameter_offset()
+{
+	if (current_context == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+		return current_context->get_parameter_offset();
 	}
 }

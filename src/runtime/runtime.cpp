@@ -28,29 +28,29 @@ std::unordered_map<int, int> colors =
 	 {14, COLOR_YELLOW},
 	 {15, COLOR_WHITE}};
 
-void init_screen()
+void init_screen_start()
 {
 	initscr();
 	current_background_color = COLOR_BLACK;
 	current_text_color = COLOR_WHITE;
 }
 
-void end_screen()
+void end_screen_start()
 {
 	endwin();
 }
 
-void limpiar_pantalla()
+void limpiar_pantalla_start()
 {
 	clear();
 }
 
-void posicionar_cursor(int line, int column)
+void posicionar_cursor_start(int line, int column)
 {
 	move(line, column);
 }
 
-void color_fondo(int color)
+void color_fondo_start(int color)
 {
 	while (color >= 16)
 	{
@@ -62,7 +62,7 @@ void color_fondo(int color)
 			  colors[current_background_color]);
 }
 
-void color_texto(int color)
+void color_texto_start(int color)
 {
 	while (color >= 16)
 	{
@@ -74,52 +74,52 @@ void color_texto(int color)
 			  colors[current_background_color]);
 }
 
-char caracter_ascii(int ascii_value)
+char caracter_ascii_start(int ascii_value)
 {
 	return static_cast<char>(ascii_value);
 }
 
-int valor_ascii(char character)
+int valor_ascii_start(char character)
 {
 	return static_cast<int>(character);
 }
 
-char obtener_caracter()
+char obtener_caracter_start()
 {
 	return getch();
 }
 
-int obtener_tecla()
+int obtener_tecla_start()
 {
 	return static_cast<int>(getch());
 }
 
-void nueva_linea()
+void nueva_linea_start()
 {
 	printw("\n");
 }
 
-int aleatorio()
+int aleatorio_start()
 {
 	return std::rand();
 }
 
-void inicializar_aleatorio()
+void inicializar_aleatorio_start()
 {
 	std::srand(std::time(0));
 }
 
-bool tecla_presionada()
+bool tecla_presionada_start()
 {
 	return true;
 }
 
-void pausa(int milliseconds)
+void pausa_start(int milliseconds)
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }
 
-int read_int()
+int read_int_start()
 {
 	int line, column;
 	getyx(stdscr, line, column);
@@ -133,12 +133,12 @@ int read_int()
 	return atoi(number);
 }
 
-char read_char()
+char read_char_start()
 {
 	return getch();
 }
 
-bool read_bool()
+bool read_bool_start()
 {
 	int line, column;
 	getyx(stdscr, line, column);
@@ -152,7 +152,7 @@ bool read_bool()
 	return atoi(boolean) == 1;
 }
 
-void print(const char *fmt, ...)
+void print_start(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);

@@ -104,26 +104,27 @@ void ArgumentDecl::load_functions(CodeHandler &code_handler)
 
 void ProgramNode::generate_code(CodeHandler &code_handler)
 {
+	code_handler.change_context(GLOBAL_CONTEXT);
 	std::ostringstream ss;
-	ss << "extern init_screen\n"
-	   << "extern end_screen\n"
-	   << "extern limpiar_pantalla\n"
-	   << "extern posicionar_cursor\n"
-	   << "extern color_fondo\n"
-	   << "extern color_texto\n"
-	   << "extern caracter_ascii\n"
-	   << "extern valor_ascii\n"
-	   << "extern obtener_caracter\n"
-	   << "extern obtener_tecla\n"
-	   << "extern nueva_linea\n"
-	   << "extern aleatorio\n"
-	   << "extern inicializar_aleatorio\n"
-	   << "extern tecla_presionada\n"
-	   << "extern pausa\n"
-	   << "extern read_int\n"
-	   << "extern read_char\n"
-	   << "extern read_bool\n"
-	   << "extern print\n"
+	ss << "extern init_screen_start\n"
+	   << "extern end_screen_start\n"
+	   << "extern limpiar_pantalla_start\n"
+	   << "extern posicionar_cursor_start\n"
+	   << "extern color_fondo_start\n"
+	   << "extern color_texto_start\n"
+	   << "extern caracter_ascii_start\n"
+	   << "extern valor_ascii_start\n"
+	   << "extern obtener_caracter_start\n"
+	   << "extern obtener_tecla_start\n"
+	   << "extern nueva_linea_start\n"
+	   << "extern aleatorio_start\n"
+	   << "extern inicializar_aleatorio_start\n"
+	   << "extern tecla_presionada_start\n"
+	   << "extern pausa_start\n"
+	   << "extern read_int_start\n"
+	   << "extern read_char_start\n"
+	   << "extern read_bool_start\n"
+	   << "extern print_start\n"
 	   << "global main\n";
 
 	std::ostringstream ss_subprogram_decl;
@@ -133,6 +134,7 @@ void ProgramNode::generate_code(CodeHandler &code_handler)
 		ss_subprogram_decl << subprogram_decl->get_code();
 	}
 
+	code_handler.change_context(GLOBAL_CONTEXT);
 	std::ostringstream ss_statement_list;
 	if (statement_list != NULL)
 	{
@@ -147,10 +149,10 @@ void ProgramNode::generate_code(CodeHandler &code_handler)
 	   << ss_subprogram_decl.str();
 
 	ss << "\nmain:\n"
-	   << "call init_screen\n"
+	   << "call init_screen_start\n"
 	   << ss_statement_list.str()
-	   << "call obtener_tecla\n"
-	   << "call end_screen\n"
+	   << "call obtener_tecla_start\n"
+	   << "call end_screen_start\n"
 	   << "mov eax, 0\n"
 	   << "ret";
 
@@ -220,7 +222,7 @@ void WriteNode::generate_code(CodeHandler &code_handler)
 
 	std::string fmt_place = code_handler.register_string_literal(fmt.str());
 	ss << "push " << fmt_place << "\n"
-	   << "call print\n"
+	   << "call print_start\n"
 	   << "add esp, " << (argsize + 4) << "\n";
 
 	set_code(ss.str());
@@ -243,7 +245,7 @@ void NumberNode::generate_code(CodeHandler &code_handler)
 
 void StringNode::generate_code(CodeHandler &code_handler)
 {
-	set_place(code_handler.register_variable(id));
+	set_place(code_handler.get_variable_place(id));
 }
 
 void LeftValue::generate_code(CodeHandler &code_handler) // work in progress
@@ -288,18 +290,18 @@ void ReadNode::generate_code(CodeHandler &code_handler)
 
 	if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Entero)
 	{
-		ss << "call read_int\n";
+		ss << "call read_int_start\n";
 	}
 	else if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Caracter)
 	{
-		ss << "call read_char\n";
+		ss << "call read_char_start\n";
 	}
 	else if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Booleano)
 	{
-		ss << "call read_bool\n";
+		ss << "call read_bool_start\n";
 	}
 	ss << "mov dword [" << expr->get_place() << "], eax\n"
-	   << "call nueva_linea\n";
+	   << "call nueva_linea_start\n";
 
 	set_code(ss.str());
 }
@@ -446,7 +448,8 @@ void ReturnNode::generate_code(CodeHandler &code_handler)
 	expr->generate_code(code_handler);
 
 	ss << expr->get_code()
-	   << "mov eax, dword [" << expr->get_place() << "]\n";
+	   << "mov eax, dword [" << expr->get_place() << "]\n"
+	   << "jmp " << code_handler.get_context_name() << "_end\n";
 
 	set_code(ss.str());
 }
@@ -801,5 +804,119 @@ void NegateExpr::generate_code(CodeHandler &code_handler)
 
 void SubprogramCall::generate_code(CodeHandler &code_handler)
 {
-	std::cerr << "Not implemented" << std::endl;
+	std::ostringstream ss;
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+
+	if (argument_list != NULL)
+	{
+		argument_list->generate_code(code_handler);
+		ss << argument_list->get_code();
+	}
+
+	std::string old_context = code_handler.get_context_name();
+	code_handler.change_context(id_str);
+
+	ss << "call " << id_str << "_start\n"
+	   << "add esp, " << code_handler.get_context_parameter_offset() << "\n";
+
+	code_handler.change_context(old_context);
+	set_place(id_str + "_start_return");
+	set_code(ss.str());
+}
+
+void SubprogramDeclList::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	auto functions = get_ast_nodes();
+	for (auto function : functions)
+	{
+		function->generate_code(code_handler);
+		ss << function->get_code();
+	}
+	set_code(ss.str());
+}
+
+void SubprogramDecl::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+
+	std::string old_context = code_handler.get_context_name();
+	header->generate_code(code_handler);
+	if (statements != NULL)
+	{
+		statements->generate_code(code_handler);
+	}
+	std::string name = code_handler.get_context_name();
+
+	ss << name << "_start:\n"
+	   << "push ebp\n"
+	   << "mov ebp, esp\n"
+	   << "sub esp, " << code_handler.get_context_variable_offset() << "\n";
+
+	if (statements != NULL)
+	{
+		ss << statements->get_code();
+	}
+
+	code_handler.change_context(GLOBAL_CONTEXT);
+	set_place(name + "_start_return");
+	code_handler.register_variable(get_place());
+
+	ss << name << "_end:\n"
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "leave\n"
+	   << "ret\n";
+
+	code_handler.change_context(old_context);
+	set_code(ss.str());
+}
+
+void SubprogramDeclHeader::generate_code(CodeHandler &code_handler)
+{
+	assert(id->get_type() == NodeEnum::StringNode);
+	StringNode *string_node = static_cast<StringNode *>(id);
+	const std::string id_str = string_node->get_id();
+
+	code_handler.change_context(id_str);
+}
+
+void CallStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	if (call->get_type() == NodeEnum::StringNode)
+	{
+		StringNode *string_node = static_cast<StringNode *>(call);
+		const std::string id_str = string_node->get_id();
+
+		ss << "call " << id_str << "_start\n";
+	}
+	else
+	{
+		call->generate_code(code_handler);
+		ss << call->get_code();
+	}
+	set_code(ss.str());
+}
+
+void ArgumentList::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	std::list<std::string> argscode;
+
+	auto arguments = get_ast_nodes();
+	for (auto argument : arguments)
+	{
+		argument->generate_code(code_handler);
+		ss << argument->get_code();
+		argscode.push_front("push dword [" + argument->get_place() + "]");
+	}
+
+	for (const auto &s : argscode)
+	{
+		ss << s << "\n";
+	}
+
+	set_code(ss.str());
 }

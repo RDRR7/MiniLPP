@@ -45,6 +45,8 @@ class CodeHandler
 	void print_all();
 	std::string get_code();
 	std::string get_context_name();
+	int get_context_variable_offset();
+	int get_context_parameter_offset();
 
   private:
 	int label_count;
