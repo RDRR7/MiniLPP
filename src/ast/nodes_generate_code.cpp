@@ -465,14 +465,18 @@ void EqualExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "sete al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -488,14 +492,18 @@ void NotEqualExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "setne al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -511,14 +519,18 @@ void LessThanExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "setl al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -534,14 +546,18 @@ void GreaterThanExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "setg al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -557,14 +573,18 @@ void LessThanOrEqualExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "setle al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -580,14 +600,18 @@ void GreaterThanOrEqualExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
 	   << "setge al\n"
 	   << "cbw\n"
 	   << "cwd\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -603,11 +627,15 @@ void AdditionExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "add eax, dword [" << expr2->get_place() << "]\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -623,11 +651,15 @@ void SubtractionExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "sub eax, dword [" << expr2->get_place() << "]\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -643,11 +675,15 @@ void OrExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "or eax, dword [" << expr2->get_place() << "]\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -663,11 +699,15 @@ void MultiplicationExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "imul eax, dword [" << expr2->get_place() << "]\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -683,13 +723,17 @@ void DivisionExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "mov ebx, dword [" << expr2->get_place() << "]\n"
 	   << "cdq\n"
 	   << "idiv ebx\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -705,13 +749,17 @@ void ModExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "mov ebx, dword [" << expr2->get_place() << "]\n"
 	   << "cdq\n"
 	   << "idiv ebx\n"
-	   << "mov dword [" << get_place() << "], edx\n";
+	   << "mov dword [" << get_place() << "], edx\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -727,11 +775,15 @@ void AndExpr::generate_code(CodeHandler &code_handler)
 
 	set_place(code_handler.new_temp());
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "and eax, dword [" << expr2->get_place() << "]\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
@@ -750,9 +802,12 @@ void PowerExpr::generate_code(CodeHandler &code_handler)
 	std::string loop_label = code_handler.new_label();
 	std::string end_loop_label = code_handler.new_label();
 
-	ss << expr1->get_code()
-	   << expr2->get_code()
+	ss << "sub esp, 4\n"
+	   << expr1->get_code()
 	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov dword [esp], eax\n"
+	   << expr2->get_code()
+	   << "mov eax, dword [esp]\n"
 	   << "mov ebx, dword [" << expr1->get_place() << "]\n"
 	   << "mov ecx, 1\n"
 	   << loop_label << ":\n"
@@ -762,7 +817,8 @@ void PowerExpr::generate_code(CodeHandler &code_handler)
 	   << "inc ecx\n"
 	   << "jmp " << loop_label << "\n"
 	   << end_loop_label << ":\n"
-	   << "mov dword [" << get_place() << "], eax\n";
+	   << "mov dword [" << get_place() << "], eax\n"
+	   << "add esp, 4\n";
 
 	set_code(ss.str());
 }
