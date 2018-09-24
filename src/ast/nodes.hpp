@@ -91,7 +91,10 @@ class ASTNode
 	{
 		this->place = place;
 	}
-	virtual void generate_code(CodeHandler &code_handler) {}
+	virtual void generate_code(CodeHandler &code_handler)
+	{
+		std::cerr << "Not implemented" << std::endl;
+	}
 
   private:
 	int line;
@@ -247,6 +250,7 @@ class StringNode : public ASTNode
 	{
 		return id;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string id;
@@ -288,6 +292,7 @@ class NumberNode : public Expr
 	{
 		return TypeEnum::Entero;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	int number;
@@ -476,6 +481,7 @@ class AssignStatement : public ASTNode
 	}
 	void syntax_analysis(std::string context) override;
 	TypeEnum infer_type(std::string context) const;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *lvalue;
@@ -498,6 +504,7 @@ class LeftValue : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -605,6 +612,7 @@ class CharacterLiteralNode : public Expr
 	{
 		return TypeEnum::Caracter;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string character_literal;
@@ -622,6 +630,7 @@ class BooleanNode : public Expr
 	{
 		return TypeEnum::Booleano;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	bool boolean;
@@ -844,6 +853,7 @@ class ReadNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;

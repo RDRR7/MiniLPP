@@ -189,6 +189,25 @@ void WriteNode::generate_code(CodeHandler &code_handler) // work in progress
 			fmt << "%s";
 			argscode.push_front("push " + argument->get_place());
 		}
+		else if (argument->get_type() == NodeEnum::Expr)
+		{
+			Expr *argument_as_expr = static_cast<Expr *>(argument);
+			if (argument_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Entero)
+			{
+				fmt << "%d";
+				argscode.push_front("push dword [" + argument->get_place() + "]");
+			}
+			else if (argument_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Caracter)
+			{
+				fmt << "%c";
+				argscode.push_front("push dword [" + argument->get_place() + "]");
+			}
+			else if (argument_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Booleano)
+			{
+				fmt << "%b";
+				argscode.push_front("push dword [" + argument->get_place() + "]");
+			}
+		}
 		ss << argument->get_code();
 		argsize += 4;
 	}
@@ -196,7 +215,7 @@ void WriteNode::generate_code(CodeHandler &code_handler) // work in progress
 
 	for (const auto &s : argscode)
 	{
-		ss << s << '\n';
+		ss << s << "\n";
 	}
 
 	std::string fmt_place = code_handler.register_string_literal(fmt.str());
@@ -210,4 +229,76 @@ void WriteNode::generate_code(CodeHandler &code_handler) // work in progress
 void StringLiteralNode::generate_code(CodeHandler &code_handler)
 {
 	set_place(code_handler.register_string_literal(string_literal));
+}
+
+void CharacterLiteralNode::generate_code(CodeHandler &code_handler)
+{
+	set_place(code_handler.register_character_literal(character_literal));
+}
+
+void NumberNode::generate_code(CodeHandler &code_handler)
+{
+	set_place(code_handler.register_constant(number));
+}
+
+void StringNode::generate_code(CodeHandler &code_handler)
+{
+	set_place(code_handler.register_variable(id));
+}
+
+void LeftValue::generate_code(CodeHandler &code_handler)
+{
+	id->generate_code(code_handler);
+	set_place(id->get_place());
+}
+
+void AssignStatement::generate_code(CodeHandler &code_handler)
+{
+	lvalue->generate_code(code_handler);
+	expr->generate_code(code_handler);
+
+	std::ostringstream ss;
+	ss << expr->get_code()
+	   << "mov eax, dword [" << expr->get_place() << "]\n"
+	   << "mov dword [" << lvalue->get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void BooleanNode::generate_code(CodeHandler &code_handler)
+{
+	if (boolean)
+	{
+		set_place(code_handler.register_constant(1));
+	}
+	else
+	{
+		set_place(code_handler.register_constant(0));
+	}
+}
+
+void ReadNode::generate_code(CodeHandler &code_handler)
+{
+	assert(expr->get_type() == NodeEnum::Expr);
+	std::ostringstream ss;
+	expr->generate_code(code_handler);
+
+	Expr *expr_as_expr = static_cast<Expr *>(expr);
+
+	if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Entero)
+	{
+		ss << "call read_int\n";
+	}
+	else if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Caracter)
+	{
+		ss << "call read_char\n";
+	}
+	else if (expr_as_expr->infer_type(code_handler.get_context_name()) == TypeEnum::Booleano)
+	{
+		ss << "call read_bool\n";
+	}
+	ss << "mov dword [" << expr->get_place() << "], eax\n"
+	   << "call nueva_linea\n";
+
+	set_code(ss.str());
 }

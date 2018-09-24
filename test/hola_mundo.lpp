@@ -1,3 +1,5 @@
+booleano x
 inicio
-	escriba "Hola mundo"
+	lea x
+	escriba "Hola mundo", '!', 10, x
 fin
