@@ -55,7 +55,7 @@
 "no"							return static_cast<int>(yytokentype::KW_NO);
 
 \'.\' 							yylval = new CharacterLiteralNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_CHARACTER_LITERAL);
-\".*\" 							yylval = new StringLiteralNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
+\"[^"(\r?\n)]*\"				yylval = new StringLiteralNode(get_line(), get_lexeme()); return static_cast<int>(yytokentype::TK_STRING_LITERAL);
 
 "+"								return static_cast<int>(Token::OP_ADD);
 "-"								return static_cast<int>(Token::OP_SUB);
