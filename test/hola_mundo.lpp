@@ -1,5 +1,27 @@
 booleano x
+entero i, j
 inicio
+	j <- 10 + 10
+	escriba j
+	j <- 10 - 10
+	escriba j
+	j <- 10 o 10
+	escriba j
+	j <- 10 * 10
+	escriba j
+	j <- 10 div 10
+	escriba j
+	j <- 10 mod 10
+	escriba j
+	j <- 10 y 10
+	escriba j
+	j <- -10
+	escriba j
+	si no j <> -10 entonces
+		escriba "j es igual a -10"
+	fin si
+	j <- 5 ^ 3
+	escriba j
 	x<-verdadero
 	mientras x haga
 		lea x
@@ -9,4 +31,39 @@ inicio
 			escriba "Falso"
 		fin si
 	fin mientras
+
+	para i <- 0 hasta 3 haga
+		escriba i
+	fin para
+
+	repita
+		escriba i
+		lea x
+	hasta x
+
+	si i = 4 entonces
+		escriba "si es igual"
+	fin si
+
+	si i <> 4 entonces
+		escriba "no es igual"
+	sino
+		escriba "si es igual"
+	fin si
+
+	si i < 5 entonces
+		escriba "si es menor"
+	fin si
+
+	si i > 2 entonces
+		escriba "si es mayor"
+	fin si
+
+	si i >= 4 entonces
+		escriba "si es mayor igual"
+	fin si
+
+	si i <= 5 entonces
+		escriba "si es menor igual"
+	fin si
 fin

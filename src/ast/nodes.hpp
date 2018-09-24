@@ -27,6 +27,7 @@
 			return oper;                                         \
 		}                                                        \
 		TypeEnum infer_type(std::string context) const override; \
+		void generate_code(CodeHandler &code_handler) override;  \
 	};
 
 enum class TypeEnum : unsigned int
@@ -275,6 +276,7 @@ class Expr : public ASTNode
 		return 255;
 	}
 	virtual TypeEnum infer_type(std::string context) const = 0;
+	virtual void generate_code(CodeHandler &code_handler) override = 0;
 };
 
 class NumberNode : public Expr
@@ -529,6 +531,7 @@ class BinaryExpr : public Expr
 	virtual std::string get_oper() const = 0;
 	virtual int get_precedence() const = 0;
 	virtual TypeEnum infer_type(std::string context) const override = 0;
+	void generate_code(CodeHandler &code_handler) override = 0;
 	ASTNode *get_expr1() const
 	{
 		return expr1;
@@ -571,6 +574,7 @@ class NegativeExpr : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -657,6 +661,7 @@ class SubprogramCall : public Expr
 	}
 	TypeEnum infer_type(std::string context) const override;
 	void check_arguments(std::string context) const;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -777,6 +782,7 @@ class ForStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *assign;
@@ -800,6 +806,7 @@ class NotDoWhileStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -819,6 +826,7 @@ class ReturnNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -875,6 +883,7 @@ class NegateExpr : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;

@@ -169,7 +169,7 @@ void StatementList::generate_code(CodeHandler &code_handler)
 	set_code(ss.str());
 }
 
-void WriteNode::generate_code(CodeHandler &code_handler) // work in progress
+void WriteNode::generate_code(CodeHandler &code_handler)
 {
 	std::ostringstream ss;
 	std::ostringstream fmt;
@@ -246,7 +246,7 @@ void StringNode::generate_code(CodeHandler &code_handler)
 	set_place(code_handler.register_variable(id));
 }
 
-void LeftValue::generate_code(CodeHandler &code_handler)
+void LeftValue::generate_code(CodeHandler &code_handler) // work in progress
 {
 	id->generate_code(code_handler);
 	set_place(id->get_place());
@@ -263,6 +263,7 @@ void AssignStatement::generate_code(CodeHandler &code_handler)
 	   << "mov dword [" << lvalue->get_place() << "], eax\n";
 
 	set_code(ss.str());
+	set_place(lvalue->get_place());
 }
 
 void BooleanNode::generate_code(CodeHandler &code_handler)
@@ -377,4 +378,428 @@ void WhileStatement::generate_code(CodeHandler &code_handler)
 	   << end_loop_label << ":\n";
 
 	set_code(ss.str());
+}
+
+void ForStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+
+	assign->generate_code(code_handler);
+	expr->generate_code(code_handler);
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+	}
+
+	std::string for_label = code_handler.new_label();
+	std::string end_for_label = code_handler.new_label();
+
+	ss << for_label << ":\n"
+	   << expr->get_code()
+	   << "mov eax, dword [" << expr->get_place() << "]\n"
+	   << "cmp dword [" << assign->get_place() << "], eax\n"
+	   << "jg " << end_for_label << "\n";
+
+	if (statement_list != NULL)
+	{
+		ss << statement_list->get_code();
+	}
+
+	ss << "inc dword [" << assign->get_place() << "]\n"
+	   << "jmp " << for_label << "\n"
+	   << end_for_label << ":\n";
+
+	set_code(ss.str());
+}
+
+void NotDoWhileStatement::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	expr->generate_code(code_handler);
+	if (statement_list != NULL)
+	{
+		statement_list->generate_code(code_handler);
+	}
+
+	std::string loop_label = code_handler.new_label();
+	std::string end_loop_label = code_handler.new_label();
+
+	ss << loop_label << ":\n";
+
+	if (statement_list != NULL)
+	{
+		ss << statement_list->get_code();
+	}
+
+	ss << expr->get_code()
+	   << "cmp dword [" << expr->get_place() << "], 1\n"
+	   << "je " << end_loop_label << "\n"
+	   << "jmp " << loop_label << "\n"
+	   << end_loop_label << ":\n";
+
+	set_code(ss.str());
+}
+
+void ReturnNode::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	expr->generate_code(code_handler);
+
+	ss << expr->get_code()
+	   << "mov eax, dword [" << expr->get_place() << "]\n";
+
+	set_code(ss.str());
+}
+
+void EqualExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "sete al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void NotEqualExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "setne al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void LessThanExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "setl al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void GreaterThanExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "setg al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void LessThanOrEqualExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "setle al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void GreaterThanOrEqualExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "cmp eax, dword [" << expr2->get_place() << "]\n"
+	   << "setge al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void AdditionExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "add eax, dword [" << expr2->get_place() << "]\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void SubtractionExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "sub eax, dword [" << expr2->get_place() << "]\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void OrExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "or eax, dword [" << expr2->get_place() << "]\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void MultiplicationExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "imul eax, dword [" << expr2->get_place() << "]\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void DivisionExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov ebx, dword [" << expr2->get_place() << "]\n"
+	   << "cdq\n"
+	   << "idiv ebx\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void ModExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov ebx, dword [" << expr2->get_place() << "]\n"
+	   << "cdq\n"
+	   << "idiv ebx\n"
+	   << "mov dword [" << get_place() << "], edx\n";
+
+	set_code(ss.str());
+}
+
+void AndExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "and eax, dword [" << expr2->get_place() << "]\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void PowerExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+	ASTNode *expr1 = get_expr1();
+	ASTNode *expr2 = get_expr2();
+
+	expr1->generate_code(code_handler);
+	expr2->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	std::string loop_label = code_handler.new_label();
+	std::string end_loop_label = code_handler.new_label();
+
+	ss << expr1->get_code()
+	   << expr2->get_code()
+	   << "mov eax, dword [" << expr1->get_place() << "]\n"
+	   << "mov ebx, dword [" << expr1->get_place() << "]\n"
+	   << "mov ecx, 1\n"
+	   << loop_label << ":\n"
+	   << "cmp ecx, dword [" << expr2->get_place() << "]\n"
+	   << "jge " << end_loop_label << "\n"
+	   << "imul eax, ebx\n"
+	   << "inc ecx\n"
+	   << "jmp " << loop_label << "\n"
+	   << end_loop_label << ":\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void NegativeExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+
+	expr->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr->get_code()
+	   << "mov eax, dword [" << expr->get_place() << "]\n"
+	   << "imul dword eax, -1\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void NegateExpr::generate_code(CodeHandler &code_handler)
+{
+	std::ostringstream ss;
+
+	expr->generate_code(code_handler);
+
+	set_place(code_handler.new_temp());
+
+	ss << expr->get_code()
+	   << "mov eax, dword [" << expr->get_place() << "]\n"
+	   << "cmp dword eax, 0\n"
+	   << "sete al\n"
+	   << "cbw\n"
+	   << "cwd\n"
+	   << "mov dword [" << get_place() << "], eax\n";
+
+	set_code(ss.str());
+}
+
+void SubprogramCall::generate_code(CodeHandler &code_handler)
+{
+	std::cerr << "Not implemented" << std::endl;
 }
