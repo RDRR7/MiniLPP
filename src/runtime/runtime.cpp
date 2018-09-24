@@ -197,6 +197,6 @@ void print_start(const char *fmt, ...)
 		}
 		index++;
 	}
-
+	refresh();
 	va_end(args);
 }
