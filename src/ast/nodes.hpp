@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include "code_handler.hpp"
 
 #define GLOBAL_CONTEXT "MAIN"
 #define RETURN_TYPE "RETURN_TYPE"
@@ -26,6 +27,7 @@
 			return oper;                                         \
 		}                                                        \
 		TypeEnum infer_type(std::string context) const override; \
+		void generate_code(CodeHandler &code_handler) override;  \
 	};
 
 enum class TypeEnum : unsigned int
@@ -48,6 +50,7 @@ enum class NodeEnum : unsigned int
 	Expr = 4,
 	Type = 5,
 	AssignStatement = 6,
+	StringLiteral = 7,
 	Other = 255,
 };
 
@@ -55,7 +58,11 @@ class ASTNode
 {
   public:
 	ASTNode(int line)
-		: line(line) {}
+		: line(line)
+	{
+		code = "";
+		place = "";
+	}
 	virtual ~ASTNode() {}
 	virtual std::string to_string() const = 0;
 	virtual NodeEnum get_type() const
@@ -68,9 +75,32 @@ class ASTNode
 	}
 	virtual void pre_syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
 	virtual void syntax_analysis(std::string context = GLOBAL_CONTEXT) {}
+	virtual void load_functions(CodeHandler &code_handler) {}
+	std::string get_code()
+	{
+		return code;
+	}
+	std::string get_place()
+	{
+		return place;
+	}
+	void set_code(std::string code)
+	{
+		this->code = code;
+	}
+	void set_place(std::string place)
+	{
+		this->place = place;
+	}
+	virtual void generate_code(CodeHandler &code_handler)
+	{
+		std::cerr << "Not implemented" << std::endl;
+	}
 
   private:
 	int line;
+	std::string code;
+	std::string place;
 };
 
 class ProgramNode : public ASTNode
@@ -96,6 +126,8 @@ class ProgramNode : public ASTNode
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *type_definition_section;
@@ -219,6 +251,7 @@ class StringNode : public ASTNode
 	{
 		return id;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string id;
@@ -243,6 +276,7 @@ class Expr : public ASTNode
 		return 255;
 	}
 	virtual TypeEnum infer_type(std::string context) const = 0;
+	virtual void generate_code(CodeHandler &code_handler) override = 0;
 };
 
 class NumberNode : public Expr
@@ -260,6 +294,7 @@ class NumberNode : public Expr
 	{
 		return TypeEnum::Entero;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	int number;
@@ -272,6 +307,7 @@ class VariableSectionList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class VariableSection : public ASTNode
@@ -290,6 +326,7 @@ class VariableSection : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *ids;
@@ -302,6 +339,7 @@ class IdList : public ASTNodeList
 	IdList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class SubprogramDeclList : public ASTNodeList
@@ -312,6 +350,8 @@ class SubprogramDeclList : public ASTNodeList
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class SubprogramDecl : public ASTNode
@@ -334,6 +374,8 @@ class SubprogramDecl : public ASTNode
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
 	void syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *header;
@@ -368,6 +410,8 @@ class SubprogramDeclHeader : public ASTNode
 		return id;
 	}
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -382,6 +426,7 @@ class ArgumentDeclList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 };
 
 class ArgumentDecl : public ASTNode
@@ -402,6 +447,7 @@ class ArgumentDecl : public ASTNode
 	}
 	std::string to_string() const override;
 	void pre_syntax_analysis(std::string context) override;
+	void load_functions(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *type;
@@ -416,6 +462,7 @@ class StatementList : public ASTNodeList
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class AssignStatement : public ASTNode
@@ -439,6 +486,7 @@ class AssignStatement : public ASTNode
 	}
 	void syntax_analysis(std::string context) override;
 	TypeEnum infer_type(std::string context) const;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *lvalue;
@@ -461,6 +509,7 @@ class LeftValue : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -485,6 +534,7 @@ class BinaryExpr : public Expr
 	virtual std::string get_oper() const = 0;
 	virtual int get_precedence() const = 0;
 	virtual TypeEnum infer_type(std::string context) const override = 0;
+	void generate_code(CodeHandler &code_handler) override = 0;
 	ASTNode *get_expr1() const
 	{
 		return expr1;
@@ -527,6 +577,7 @@ class NegativeExpr : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -543,6 +594,11 @@ class StringLiteralNode : public ASTNode
 	{
 		return string_literal;
 	}
+	NodeEnum get_type() const override
+	{
+		return NodeEnum::StringLiteral;
+	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string string_literal;
@@ -563,6 +619,7 @@ class CharacterLiteralNode : public Expr
 	{
 		return TypeEnum::Caracter;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	std::string character_literal;
@@ -580,6 +637,7 @@ class BooleanNode : public Expr
 	{
 		return TypeEnum::Booleano;
 	}
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	bool boolean;
@@ -606,6 +664,7 @@ class SubprogramCall : public Expr
 	}
 	TypeEnum infer_type(std::string context) const override;
 	void check_arguments(std::string context) const;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *id;
@@ -618,6 +677,7 @@ class ArgumentList : public ASTNodeList
 	ArgumentList(int line)
 		: ASTNodeList(line) {}
 	std::string to_string() const override;
+	void generate_code(CodeHandler &code_handler) override;
 };
 
 class CallStatement : public ASTNode
@@ -633,6 +693,7 @@ class CallStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *call;
@@ -657,6 +718,7 @@ class IfStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -677,6 +739,7 @@ class ElseStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *statement_list;
@@ -698,6 +761,7 @@ class WhileStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -723,6 +787,7 @@ class ForStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *assign;
@@ -746,6 +811,7 @@ class NotDoWhileStatement : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -765,6 +831,7 @@ class ReturnNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -783,6 +850,7 @@ class WriteNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *argument_list;
@@ -801,6 +869,7 @@ class ReadNode : public ASTNode
 	}
 	std::string to_string() const override;
 	void syntax_analysis(std::string context) override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;
@@ -819,6 +888,7 @@ class NegateExpr : public Expr
 	}
 	std::string to_string() const override;
 	TypeEnum infer_type(std::string context) const override;
+	void generate_code(CodeHandler &code_handler) override;
 
   private:
 	ASTNode *expr;

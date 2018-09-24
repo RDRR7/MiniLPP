@@ -7,7 +7,7 @@
 */
 
 /*
-    *  Debe ingresar: 
+    *  Debe ingresar:
     -> Dos direcciones IPv4 (la de origen con la mascara de subred)
     *  Ejemplo:
         Arreglo [5] de Entero origen
@@ -98,7 +98,7 @@ Inicio
     destino[3] <- 255
     destino[4] <- 255
     _necesitaEnrutamiento <- necesitaEnrutamiento(origen, destino)
-    Escriba "Necesita enrutamiento? "
+    Escriba "Necesita enrutamiento "
     Si _necesitaEnrutamiento = Verdadero Entonces
     	Escriba "Si"
     Sino
