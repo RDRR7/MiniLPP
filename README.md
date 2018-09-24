@@ -8,3 +8,8 @@ cd build/
 cmake ../src/
 make
 ```
+
+## 🏃🏻‍ Run
+```
+./mini_lpp.elf <input file>
+```
