@@ -32,11 +32,11 @@ class CodeHandler
 	std::string new_label();
 	void new_function(std::string name);
 	void change_context(std::string name);
-	void register_variable(std::string name);
+	std::string register_variable(std::string name);
 	std::string register_string_literal(std::string value);
-	void register_character_literal(std::string value);
-	void register_constant(int value);
-	void register_function_parameter(std::string name);
+	std::string register_character_literal(std::string value);
+	std::string register_constant(int value);
+	std::string register_function_parameter(std::string name);
 	std::string get_variable_place(std::string name);
 	std::string get_string_literal_place(std::string value);
 	std::string get_character_literal_place(std::string value);
@@ -44,6 +44,7 @@ class CodeHandler
 	std::string new_temp();
 	void print_all();
 	std::string get_code();
+	std::string get_context_name();
 
   private:
 	int label_count;

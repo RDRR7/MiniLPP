@@ -8,16 +8,22 @@
 class FunctionHandler
 {
   public:
-	FunctionHandler()
-		: parameter_offset(8),
+	FunctionHandler(std::string name)
+		: name(name),
+		  parameter_offset(8),
 		  variable_offset(-4) {}
 	~FunctionHandler() {}
 	void register_parameter(std::string name);
 	void register_variable(std::string name);
 	std::string get_variable_place(std::string name);
 	void print_all();
+	std::string get_name()
+	{
+		return name;
+	}
 
   private:
+	std::string name;
 	int parameter_offset;
 	int variable_offset;
 	std::unordered_map<std::string, std::string> parameters;

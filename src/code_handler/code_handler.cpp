@@ -33,7 +33,7 @@ std::string CodeHandler::new_label()
 
 void CodeHandler::new_function(std::string name)
 {
-	FunctionHandler *function = new FunctionHandler();
+	FunctionHandler *function = new FunctionHandler(name);
 	functions[name] = function;
 }
 
@@ -49,15 +49,17 @@ void CodeHandler::change_context(std::string name)
 	}
 }
 
-void CodeHandler::register_variable(std::string name)
+std::string CodeHandler::register_variable(std::string name)
 {
 	if (current_context == NULL)
 	{
 		variables.insert(name);
+		return name;
 	}
 	else
 	{
 		current_context->register_variable(name);
+		return get_variable_place(name);
 	}
 }
 
@@ -70,26 +72,29 @@ std::string CodeHandler::register_string_literal(std::string value)
 	return literals[value];
 }
 
-void CodeHandler::register_character_literal(std::string value)
+std::string CodeHandler::register_character_literal(std::string value)
 {
 	if (literals.find(value) == literals.end())
 	{
 		literals[value] = new_character_literal();
 	}
+	return literals[value];
 }
 
-void CodeHandler::register_constant(int value)
+std::string CodeHandler::register_constant(int value)
 {
 	if (constants.find(value) == constants.end())
 	{
 		constants[value] = new_constant();
 	}
+	return constants[value];
 }
 
-void CodeHandler::register_function_parameter(std::string name)
+std::string CodeHandler::register_function_parameter(std::string name)
 {
 	assert(current_context != NULL);
 	current_context->register_parameter(name);
+	return get_variable_place(name);
 }
 
 std::string CodeHandler::get_variable_place(std::string name)
@@ -174,7 +179,7 @@ std::string CodeHandler::get_code()
 
 	for (auto variable : variables)
 	{
-		ss << variable << "\tdd\t0x00\n";
+		ss << variable << "\tdd\t0\n";
 	}
 
 	for (auto literal : literals)
@@ -184,8 +189,25 @@ std::string CodeHandler::get_code()
 
 	for (auto constant : constants)
 	{
-		ss << constant.second << "\t\tdb\t" << constant.first << "\n";
+		ss << constant.second << "\t\tdd\t" << constant.first << "\n";
+	}
+
+	for (int i = 0; i < temp_count; i++)
+	{
+		ss << "temp" << i << "\tdd\t0\n";
 	}
 
 	return ss.str();
+}
+
+std::string CodeHandler::get_context_name()
+{
+	if (current_context == NULL)
+	{
+		return GLOBAL_CONTEXT;
+	}
+	else
+	{
+		return current_context->get_name();
+	}
 }
