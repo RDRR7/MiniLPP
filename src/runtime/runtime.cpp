@@ -178,6 +178,12 @@ void print(const char *fmt, ...)
 			printw("%d", (bool)b);
 			index++;
 		}
+		else if (fmt[index] == '%' && fmt[index + 1] == 's')
+		{
+			char *s = va_arg(args, char *);
+			printw("%s", s);
+			index++;
+		}
 		else
 		{
 			printw("%c", fmt[index]);
